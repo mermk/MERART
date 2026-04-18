@@ -1,1 +1,18 @@
+# 🎨 MERART
+### The Creative Gateway for Visual Excellence
 
+MERART is a high-end generative tool designed to bridge the gap between imagination and visual art. It specializes in generating high-quality images and videos using open-source AI models, tailored specifically for artistic research, anatomy, and calligraphy references.
+
+## ✨ Key Features:
+* **Image Generation:** High-fidelity visuals without watermarks, powered by the Flux model.
+* **Video Generation:** Dynamic video creation based on descriptive prompts.
+* **Smart Archiving:** Complete integration with Supabase for logging every creative prompt and result in the `merart_logs` table.
+* **Privacy & Control:** A private environment where your artistic data remains under your ownership.
+
+## 🛠️ Technical Stack:
+* **Frontend:** HTML5, CSS3, JavaScript (Pure Vanilla).
+* **Database:** Supabase (PostgreSQL) for secure data logging.
+* **AI Engine:** Integrated via Pollinations AI (Flux & ZeroScope).
+
+## 🖋️ About
+This project was built to empower the artist with immediate visual references, anatomical studies, and creative backgrounds, ensuring a seamless workflow from concept to final masterpiece.
