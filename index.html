@@ -8,9 +8,11 @@
     <style>
         :root { --primary-gold: #D4AF37; --dark-bg: #0a0a0a; --card-bg: #111; --text: #e0e0e0; }
         body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 700px; padding: 10px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-gold); letter-spacing: 8px; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 10px rgba(212, 175, 55, 0.3); }
-        .container { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
+        
+        /* تكبير الحاوية الرئيسية لاستيعاب الصور الضخمة */
+        .container { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 850px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
         
         .size-selector { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
         .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 14px; }
@@ -25,8 +27,9 @@
         .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
         .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        #result-box { margin-top: 25px; min-height: 450px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
-        img { max-width: 100%; max-height: 85vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
+        /* تكبير مساحة العرض لراحة العين والدقة العالية */
+        #result-box { margin-top: 25px; min-height: 600px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 15px; overflow: hidden;}
+        img { max-width: 100%; max-height: 90vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
         img.loaded { opacity: 1; }
         
         .loader-wrapper { display: none; width: 80%; text-align: center; }
@@ -135,7 +138,7 @@
 
         try {
             const seed = Math.floor(Math.random() * 999999);
-            // البهارات المقدسة مع إضافة (Perfect anatomy) لمنع التشوه
+            // البهارات المقدسة + مضادات التشويه
             const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, cinematic lighting, masterpiece, 8k, ultra-realism, (perfect anatomy, straight limbs, no deformities, anatomically correct)";
             lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + enhanceKeywords)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=flux&enhance=true`;
             
