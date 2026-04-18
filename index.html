@@ -12,7 +12,6 @@
         .header h1 { color: var(--primary-gold); letter-spacing: 8px; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 10px rgba(212, 175, 55, 0.3); }
         .container { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
         
-        /* إضافة ستايل أزرار المقاسات */
         .size-selector { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
         .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 14px; }
         .size-btn.active { border-color: var(--primary-gold); color: var(--primary-gold); background: #050505; box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); }
@@ -26,8 +25,9 @@
         .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
         .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        #result-box { margin-top: 25px; min-height: 450px; border: 1px solid #222; background: #050505; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
-        img { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
+        /* تعديل جوهري هنا لمنع التمطيط */
+        #result-box { margin-top: 25px; min-height: 450px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
+        img { max-width: 100%; max-height: 85vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
         img.loaded { opacity: 1; }
         
         .loader-wrapper { display: none; width: 80%; text-align: center; }
@@ -54,10 +54,10 @@
     <div class="size-selector">
         <button class="size-btn active" onclick="setSize(1024, 1024, this)">مربع (1:1)</button>
         <button class="size-btn" onclick="setSize(720, 1280, this)">طولي (كامل)</button>
-        <button class="size-btn" onclick="setSize(1280, 720, this)">عرضي (سينمائي)</button>
+        <button class="size-btn" onclick="setSize(1280, 720, this)">سينمائي (عريض)</button>
     </div>
 
-    <textarea id="promptInput" rows="4" placeholder="اوصف لوحتك هنا باللغة العربية أو الإنجليزية.."></textarea>
+    <textarea id="promptInput" rows="4" placeholder="اوصف لوحتك هنا يا حمودي..."></textarea>
     
     <button class="btn-main" id="genBtn" onclick="generate()">استحضار الفن الاحترافي ✨</button>
 
@@ -84,16 +84,11 @@
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
     let lastUrl = '';
-    let timerInterval;
-    let progressInterval;
-    
-    // متغيرات الأبعاد الجديدة
-    let currentW = 1024;
-    let currentH = 1024;
+    let timerInterval, progressInterval;
+    let currentW = 1024, currentH = 1024;
 
     function setSize(w, h, btn) {
-        currentW = w;
-        currentH = h;
+        currentW = w; currentH = h;
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
@@ -107,8 +102,7 @@
         document.getElementById('genBtn').disabled = false;
         document.getElementById('genBtn').innerText = "استحضار الفن الاحترافي ✨";
         document.getElementById('progressBar').style.width = '0%';
-        clearInterval(timerInterval);
-        clearInterval(progressInterval);
+        clearInterval(timerInterval); clearInterval(progressInterval);
     }
 
     async function generate() {
@@ -128,50 +122,27 @@
         genBtn.disabled = true;
         genBtn.innerText = "يتم الاستحضار...";
 
-        let seconds = 0;
-        let progress = 0;
-        const statusMessages = [
-            "جاري تحليل الأبعاد الفنية...",
-            "جاري رسم التفاصيل الدقيقة...",
-            "جاري تطبيق الإضاءة السينمائية...",
-            "جاري صقل العيون والملامح...",
-            "شوية صبر، اللوحة بدت تكتمل...",
-            "تقريباً خلصنا، انتظر السحر..."
-        ];
+        let seconds = 0, progress = 0;
+        const statusMessages = ["تحليل الأبعاد...", "رسم التفاصيل...", "تطبيق الإضاءة...", "صقل الملامح..."];
 
         timerInterval = setInterval(() => {
             seconds++;
             document.getElementById('timer').innerText = `الموقت: ${seconds} ثانية`;
-            if (seconds % 8 === 0) {
-                const msgIndex = Math.floor(seconds / 8) % statusMessages.length;
-                statusText.innerText = statusMessages[msgIndex];
-            }
-            if (seconds > 120) {
-                resetUI();
-                alert("السيرفر تأخر هواية!");
-            }
+            if (seconds % 8 === 0) statusText.innerText = statusMessages[Math.floor(seconds/8)%statusMessages.length];
+            if (seconds > 120) { resetUI(); alert("تأخر السيرفر!"); }
         }, 1000);
 
-        progressInterval = setInterval(() => {
-            if (progress < 98) {
-                progress += 1.5;
-                progressBar.style.width = progress + '%';
-            }
-        }, 400);
+        progressInterval = setInterval(() => { if (progress < 98) { progress += 1.5; progressBar.style.width = progress + '%'; } }, 400);
 
         try {
             const seed = Math.floor(Math.random() * 999999);
-            // رجعتلك بهاراتك المقدسة كاملة
-            const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, dramatic atmosphere, cinematic lighting, masterpiece, 8k, ultra-realism";
-            
-            // الرابط هسة صار ياخذ الـ currentW والـ currentH اللي تختارهم
+            const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, cinematic lighting, masterpiece, 8k, ultra-realism";
             lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + enhanceKeywords)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=flux&enhance=true`;
             
             const img = new Image();
             img.src = lastUrl;
             img.onload = () => {
-                clearInterval(timerInterval);
-                clearInterval(progressInterval);
+                clearInterval(timerInterval); clearInterval(progressInterval);
                 progressBar.style.width = '100%';
                 setTimeout(() => {
                     loaderWrap.style.display = 'none';
@@ -182,30 +153,19 @@
                     genBtn.innerText = "استحضار الفن الاحترافي ✨";
                 }, 600);
             };
-            img.onerror = () => { throw new Error(); };
-        } catch (e) {
-            resetUI();
-            alert("صارت مشكلة بالمحرك!");
-        }
+        } catch (e) { resetUI(); alert("خطأ!"); }
     }
 
     async function saveToCloud() {
         const prompt = document.getElementById('promptInput').value;
-        const { error } = await _supabase
-            .from('merart_logs')
-            .insert([{ prompt: prompt, content_type: 'Image (Pro)', output_url: lastUrl }]);
-        if (error) alert("مشكلة بالحفظ: " + error.message);
-        else alert("تم الحفظ في مخزن MERART بنجاح! 🦉🎨");
+        const { error } = await _supabase.from('merart_logs').insert([{ prompt: prompt, content_type: 'Image (Pro)', output_url: lastUrl }]);
+        alert(error ? "خطأ بالحفظ" : "تم الحفظ! 🦉🎨");
     }
 
     function download() {
-        const link = document.createElement('a');
-        link.href = lastUrl; link.target = '_blank';
-        link.download = `MERART_${Date.now()}.png`;
-        document.body.appendChild(link); link.click();
-        document.body.removeChild(link);
+        const link = document.createElement('a'); link.href = lastUrl; link.target = '_blank';
+        link.download = `MERART_${Date.now()}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 </script>
-
 </body>
 </html>
