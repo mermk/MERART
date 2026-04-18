@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART</title>
+    <title>MERART - الصور الاحترافية</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-bg: #0a0a0a; --card-bg: #111; --text: #e0e0e0; }
@@ -13,26 +13,27 @@
         .container { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
         textarea { width: 100%; padding: 15px; background: #050505; border: 1px solid #333; color: white; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
         textarea:focus { border-color: var(--primary-gold); outline: none; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        .mode-selector { display: flex; background: #050505; border-radius: 10px; padding: 5px; margin-bottom: 20px; border: 1px solid #222; }
-        .mode-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; border-radius: 8px; transition: 0.4s; font-weight: bold; color: #666; }
-        .mode-btn.active { background: var(--primary-gold); color: black; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+        
+        .mode-title { text-align: center; color: var(--primary-gold); font-weight: bold; font-size: 1.2em; margin-bottom: 20px; letter-spacing: 2px; }
+
         .btn-main { width: 100%; padding: 18px; background: var(--primary-gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; color: black; transition: 0.3s; }
         .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
         .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        #result-box { margin-top: 25px; min-height: 400px; border: 1px solid #222; background: #050505; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
-        img, video { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; }
+        #result-box { margin-top: 25px; min-height: 450px; border: 1px solid #222; background: #050505; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
+        img { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; }
+        img.loaded { opacity: 1; }
         
-        /* New Professional Loader */
+        /* Progressive Loader */
         .loader-wrapper { display: none; width: 80%; text-align: center; }
-        .progress-container { width: 100%; height: 6px; background: #222; border-radius: 10px; margin: 20px 0; overflow: hidden; position: relative; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary-gold); box-shadow: 0 0 15px var(--primary-gold); transition: width 0.3s ease; }
-        .status-msg { color: var(--primary-gold); font-size: 14px; font-weight: bold; margin-bottom: 10px; }
-        .timer-text { color: #666; font-size: 12px; }
+        .progress-container { width: 100%; height: 8px; background: #1a1a1a; border-radius: 10px; margin: 20px 0; overflow: hidden; position: relative; border: 1px solid #333; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%); box-shadow: 0 0 15px var(--primary-gold); transition: width 0.4s ease; }
+        .status-msg { color: var(--primary-gold); font-size: 16px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 0 5px rgba(212,175,55,0.5); }
+        .timer-text { color: #888; font-size: 13px; }
 
         .action-btns { display: none; gap: 12px; margin-top: 20px; width: 100%; }
-        .btn-sec { flex: 1; padding: 12px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .btn-sec:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
+        .btn-sec { flex: 1; padding: 14px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 16px; }
+        .btn-sec:hover { border-color: var(--primary-gold); color: var(--primary-gold); background: #050505; }
     </style>
 </head>
 <body>
@@ -42,29 +43,26 @@
 </div>
 
 <div class="container">
-    <div class="mode-selector">
-        <div id="m-img" class="mode-btn active" onclick="setMode('Image')">توليد صورة احترافية</div>
-        <div id="m-vid" class="mode-btn" onclick="setMode('Video')">توليد فيديو</div>
-    </div>
+    <div class="mode-title">محرك الصور الاحترافية <br> (4K & Ultra Realism)</div>
 
-    <textarea id="promptInput" rows="4" placeholder="اوصف خيالك الفني هنا.. (مثلاً: وجه حقيقي جداً، تفاصيل عيون حادة، 8k)"></textarea>
+    <textarea id="promptInput" rows="4" placeholder="اوصف لوحتك هنا باللغة العربية أو الإنجليزية.. (مثلاً: وجه حقيقي جداً، تفاصيل عيون حادة)"></textarea>
     
-    <button class="btn-main" id="genBtn" onclick="generate()">ابدأ التوليد ✨</button>
+    <button class="btn-main" id="genBtn" onclick="generate()">استحضار الفن الاحترافي ✨</button>
 
     <div id="result-box">
         <div class="loader-wrapper" id="loaderWrapper">
-            <div class="status-msg" id="statusText">جاري تحليل الأوتار الفنية...</div>
+            <div class="status-msg" id="statusText">جاري تحليل الأبعاد الفنية...</div>
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             <div class="timer-text" id="timer">الموقت: 0 ثانية</div>
         </div>
-        <p id="placeholder" style="color: #444;">بانتظار لمستك الإبداعية يا "حمودي"...</p>
+        <p id="placeholder" style="color: #444; text-align:center;">بانتظار لمستك الإبداعية يا "حمودي"... <br> (تلميح: اكتب "High Resolution" للحصول على أفضل دقة)</p>
     </div>
 
     <div class="action-btns" id="actions">
-        <button class="btn-sec" onclick="download()">تنزيل مباشر</button>
-        <button class="btn-sec" style="border-color: #D4AF37; color: #D4AF37;" onclick="saveToCloud()">حفظ في MERART</button>
+        <button class="btn-sec" onclick="download()">تنزيل مباشر 💾</button>
+        <button class="btn-sec" style="border-color: #D4AF37; color: #D4AF37;" onclick="saveToCloud()">حفظ في أرشيف MERART 🦉</button>
     </div>
 </div>
 
@@ -73,25 +71,18 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    let mode = 'Image';
     let lastUrl = '';
     let timerInterval;
     let progressInterval;
 
-    function setMode(m) {
-        mode = m;
-        document.getElementById('m-img').classList.toggle('active', m === 'Image');
-        document.getElementById('m-vid').classList.toggle('active', m === 'Video');
-    }
-
     function resetUI() {
         const box = document.getElementById('result-box');
-        const old = box.querySelector('img, video'); if(old) old.remove();
+        const old = box.querySelector('img'); if(old) old.remove();
         document.getElementById('loaderWrapper').style.display = 'none';
         document.getElementById('placeholder').style.display = 'block';
         document.getElementById('actions').style.display = 'none';
         document.getElementById('genBtn').disabled = false;
-        document.getElementById('genBtn').innerText = "ابدأ التوليد ✨";
+        document.getElementById('genBtn').innerText = "استحضار الفن الاحترافي ✨";
         document.getElementById('progressBar').style.width = '0%';
         clearInterval(timerInterval);
         clearInterval(progressInterval);
@@ -99,7 +90,7 @@
 
     async function generate() {
         const prompt = document.getElementById('promptInput').value;
-        if (!prompt) return alert("اكتب وصفك يا بطل!");
+        if (!prompt) return alert("اكتب وصفك يا بطل آل مير!");
 
         const loaderWrap = document.getElementById('loaderWrapper');
         const statusText = document.getElementById('statusText');
@@ -108,87 +99,84 @@
         const box = document.getElementById('result-box');
         
         // Setup UI for generation
-        const old = box.querySelector('img, video'); if(old) old.remove();
+        const old = box.querySelector('img'); if(old) old.remove();
         document.getElementById('placeholder').style.display = 'none';
         document.getElementById('actions').style.display = 'none';
         loaderWrap.style.display = 'block';
         genBtn.disabled = true;
-        genBtn.innerText = "يتم التوليد...";
+        genBtn.innerText = "يتم الاستحضار...";
 
         let seconds = 0;
         let progress = 0;
+        const statusMessages = [
+            "جاري تحليل الأبعاد الفنية...",
+            "جاري رسم التفاصيل الدقيقة...",
+            "جاري تطبيق الإضاءة السينمائية...",
+            "جاري صقل العيون والملامح...",
+            "شوية صبر، اللوحة بدت تكتمل...",
+            "تقريباً خلصنا، انتظر السحر..."
+        ];
 
-        // Timer and Fake Progress Logic
+        // Timer Logic
         timerInterval = setInterval(() => {
             seconds++;
             document.getElementById('timer').innerText = `الموقت: ${seconds} ثانية`;
-            if (seconds > 30) statusText.innerText = "السيرفر مزدحم، جاي أحاول غصب...";
-            if (seconds > 60 && mode === 'Video') statusText.innerText = "الفيديو يطول شوية، ابقى وياي..";
+            if (seconds % 8 === 0) {
+                const msgIndex = Math.floor(seconds / 8) % statusMessages.length;
+                statusText.innerText = statusMessages[msgIndex];
+            }
             if (seconds > 120) {
                 resetUI();
-                alert("السيرفر علّق! جرب تضغط توليد مرة ثانية.");
+                alert("السيرفر تأخر هواية! جرب تضغط توليد مرة ثانية.");
             }
         }, 1000);
 
+        // Progress Bar Logic
         progressInterval = setInterval(() => {
-            if (progress < 95) {
-                progress += (mode === 'Image' ? 2 : 0.5);
+            if (progress < 98) {
+                progress += 1.5; // السرعة تقديرية
                 progressBar.style.width = progress + '%';
             }
-        }, 500);
+        }, 400);
 
         try {
             const seed = Math.floor(Math.random() * 999999);
-            if (mode === 'Image') {
-                // EXTREME REALISM MODEL (FLUX)
-                lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ", highly detailed, masterpiece, 8k, sharp focus, realistic eyes, cinematic lighting")}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux&enhance=true`;
-                
-                const img = new Image();
-                img.src = lastUrl;
-                img.onload = () => {
-                    completeGeneration(img);
-                };
-                img.onerror = () => { throw new Error(); };
-            } else {
-                // VIDEO MODEL
-                lastUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?model=video&seed=${seed}&width=512&height=512`;
-                const video = document.createElement('video');
-                video.src = lastUrl;
-                video.autoplay = true;
-                video.loop = true;
-                video.controls = true;
-                video.onloadeddata = () => {
-                    completeGeneration(video);
-                };
-                video.onerror = () => { throw new Error(); };
-            }
+            // البهارات الفنية المخفية بالكود
+            const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, dramatic atmosphere, cinematic lighting, masterpiece, 8k, ultra-realism";
+            
+            // رابط الموديل الأقوى مع البهارات
+            lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + enhanceKeywords)}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux&enhance=true`;
+            
+            const img = new Image();
+            img.src = lastUrl;
+            img.onload = () => {
+                clearInterval(timerInterval);
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    loaderWrap.style.display = 'none';
+                    img.classList.add('loaded');
+                    box.appendChild(img);
+                    document.getElementById('actions').style.display = 'flex';
+                    genBtn.disabled = false;
+                    genBtn.innerText = "استحضار الفن الاحترافي ✨";
+                }, 600);
+            };
+            img.onerror = () => { throw new Error(); };
         } catch (e) {
             resetUI();
             alert("صارت مشكلة بالمحرك، جرب مرة ثانية!");
         }
     }
 
-    function completeGeneration(element) {
-        clearInterval(timerInterval);
-        clearInterval(progressInterval);
-        document.getElementById('progressBar').style.width = '100%';
-        setTimeout(() => {
-            document.getElementById('loaderWrapper').style.display = 'none';
-            document.getElementById('result-box').appendChild(element);
-            document.getElementById('actions').style.display = 'flex';
-            document.getElementById('genBtn').disabled = false;
-            document.getElementById('genBtn').innerText = "ابدأ التوليد ✨";
-        }, 500);
-    }
-
     async function saveToCloud() {
         const prompt = document.getElementById('promptInput').value;
         const { error } = await _supabase
             .from('merart_logs')
-            .insert([{ prompt: prompt, content_type: mode, output_url: lastUrl }]);
+            .insert([{ prompt: prompt, content_type: 'Image (Pro)', output_url: lastUrl }]);
         
         if (error) alert("مشكلة بالحفظ: " + error.message);
-        else alert("تم الحفظ في مخزن MERART! 🦉");
+        else alert("تم الحفظ في مخزن MERART بنجاح! 🦉🎨");
     }
 
     function download() {
