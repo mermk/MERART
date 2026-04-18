@@ -18,10 +18,17 @@
         .mode-btn.active { background: var(--primary-gold); color: black; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
         .btn-main { width: 100%; padding: 18px; background: var(--primary-gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; color: black; transition: 0.3s; }
         .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
-        #result-box { margin-top: 25px; min-height: 350px; border: 1px solid #222; background: #050505; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
-        img, video { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .loader { border: 4px solid #111; border-top: 4px solid var(--primary-gold); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; }
+        
+        /* Loading Area */
+        #result-box { margin-top: 25px; min-height: 350px; border: 1px solid #222; background: #050505; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
+        img, video { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); transition: opacity 0.5s ease-in; }
+        
+        .loader-wrapper { display: none; text-align: center; }
+        .loader { border: 3px solid transparent; border-top: 3px solid var(--primary-gold); border-right: 3px solid var(--primary-gold); border-radius: 50%; width: 60px; height: 60px; animation: spin 0.8s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { color: var(--primary-gold); font-size: 14px; letter-spacing: 1px; }
+        #timer { color: #666; font-size: 12px; margin-top: 5px; }
+
         .action-btns { display: none; gap: 12px; margin-top: 20px; width: 100%; }
         .btn-sec { flex: 1; padding: 12px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; }
         .btn-sec:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
@@ -41,10 +48,14 @@
 
     <textarea id="promptInput" rows="4" placeholder="اوصف خيالك الفني هنا يا حمودي..."></textarea>
     
-    <button class="btn-main" onclick="generate()">ابدأ التوليد ✨</button>
+    <button class="btn-main" id="genBtn" onclick="generate()">ابدأ التوليد ✨</button>
 
     <div id="result-box">
-        <div class="loader" id="loader"></div>
+        <div class="loader-wrapper" id="loaderWrapper">
+            <div class="loader"></div>
+            <div class="loading-text" id="statusText">جاري استحضار الفن...</div>
+            <div id="timer">الثواني: 0</div>
+        </div>
         <p id="placeholder" style="color: #444;">بانتظار لمستك الإبداعية...</p>
     </div>
 
@@ -55,13 +66,13 @@
 </div>
 
 <script>
-    // بيانات الربط الخاصة بـ "حمودي"
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
     let mode = 'Image';
     let lastUrl = '';
+    let timerInterval;
 
     function setMode(m) {
         mode = m;
@@ -69,33 +80,57 @@
         document.getElementById('m-vid').classList.toggle('active', m === 'Video');
     }
 
+    function startTimer() {
+        let seconds = 0;
+        const timerElem = document.getElementById('timer');
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds++;
+            timerElem.innerText = `الثواني: ${seconds}`;
+            if(seconds > 10) document.getElementById('statusText').innerText = "شوية صبر، اللوحة بدت تكتمل...";
+        }, 1000);
+    }
+
     async function generate() {
         const prompt = document.getElementById('promptInput').value;
         if (!prompt) return alert("اكتب شي يا بطل!");
 
-        const loader = document.getElementById('loader');
+        const loaderWrap = document.getElementById('loaderWrapper');
         const box = document.getElementById('result-box');
         const actions = document.getElementById('actions');
+        const genBtn = document.getElementById('genBtn');
         
+        // تنظيف الواجهة
         const old = box.querySelector('img, video'); if(old) old.remove();
-        loader.style.display = 'block';
+        loaderWrap.style.display = 'block';
+        document.getElementById('statusText').innerText = "جاري استحضار الفن...";
         document.getElementById('placeholder').style.display = 'none';
         actions.style.display = 'none';
+        genBtn.disabled = true;
+        genBtn.innerText = "جاري العمل...";
+        
+        startTimer();
 
         try {
-            const seed = Math.floor(Math.random() * 888888);
+            const seed = Math.floor(Math.random() * 999999);
             if (mode === 'Image') {
-                // استخدام موديل متطور وصافي للصور
-                lastUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
+                // استخدام رابط الصور المباشر والأسرع
+                lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+                
                 const img = new Image();
                 img.src = lastUrl;
                 img.onload = () => {
-                    loader.style.display = 'none';
+                    clearInterval(timerInterval);
+                    loaderWrap.style.display = 'none';
                     box.appendChild(img);
                     actions.style.display = 'flex';
+                    genBtn.disabled = false;
+                    genBtn.innerText = "ابدأ التوليد ✨";
+                };
+                img.onerror = () => {
+                   throw new Error("فشل في تحميل الصورة");
                 };
             } else {
-                // توليد فيديو (مفتوح القيود)
                 lastUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?model=video&seed=${seed}`;
                 const video = document.createElement('video');
                 video.src = lastUrl;
@@ -103,36 +138,38 @@
                 video.loop = true;
                 video.controls = true;
                 video.onloadeddata = () => {
-                    loader.style.display = 'none';
+                    clearInterval(timerInterval);
+                    loaderWrap.style.display = 'none';
                     box.appendChild(video);
                     actions.style.display = 'flex';
+                    genBtn.disabled = false;
+                    genBtn.innerText = "ابدأ التوليد ✨";
                 };
             }
         } catch (e) {
+            clearInterval(timerInterval);
             alert("المحرك مشغول، حاول مرة ثانية!");
-            loader.style.display = 'none';
+            loaderWrap.style.display = 'none';
+            genBtn.disabled = false;
+            genBtn.innerText = "ابدأ التوليد ✨";
         }
     }
 
     async function saveToCloud() {
         const prompt = document.getElementById('promptInput').value;
-        const { data, error } = await _supabase
+        const { error } = await _supabase
             .from('merart_logs')
             .insert([{ prompt: prompt, content_type: mode, output_url: lastUrl }]);
         
-        if (error) {
-            console.error(error);
-            alert("صارت مشكلة بالحفظ.. تأكد إنك نفذت كود الـ SQL بالبداية!");
-        } else {
-            alert("تم الحفظ في مخزن MERART بنجاح! 🦉✨");
-        }
+        if (error) alert("صارت مشكلة بالحفظ.. تأكد من الجدول!");
+        else alert("تم الحفظ في مخزن MERART بنجاح! 🦉✨");
     }
 
     function download() {
         const link = document.createElement('a');
         link.href = lastUrl;
         link.target = '_blank';
-        link.download = `MERART_${Date.now()}`;
+        link.download = `MERART_${Date.now()}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
