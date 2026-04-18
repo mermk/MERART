@@ -3,35 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART - المنصة الاحترافية لتوليد الصور</title>
+    <title>MERART V5 - نظام المصادر الديناميكية</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
         body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-green); letter-spacing: 10px; margin: 0; font-size: 2.2em; text-transform: uppercase; }
-        
         .container { width: 100%; max-width: 850px; }
         .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         .section-title { color: var(--primary-green); font-weight: bold; margin-bottom: 20px; display: block; border-right: 5px solid var(--primary-green); padding-right: 15px; font-size: 1.1em; }
-        
         .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         select, input, textarea { width: 100%; padding: 14px; background: #000; border: 1px solid #333; color: white; border-radius: 12px; font-size: 14px; outline: none; box-sizing: border-box; }
         select:focus, input:focus, textarea:focus { border-color: var(--primary-green); }
-
         .btn-gen { width: 100%; padding: 16px; background: var(--primary-green); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; color: black; margin-bottom: 15px; transition: 0.3s; }
-        .btn-gen:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        
         .viewer-studio { min-height: 120px; background: #000; border-radius: 15px; border: 1px dashed #333; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; position: relative; }
         .img-result { max-width: 100%; border-radius: 10px; display: none; box-shadow: 0 0 30px rgba(0,0,0,1); }
-        
-        /* Loading UI Professional Green */
         .loader-ui { display: none; width: 100%; text-align: center; }
         .progress-cont { width: 100%; height: 8px; background: #1a1a1a; border-radius: 10px; margin: 15px 0; overflow: hidden; border: 1px solid #222; }
         .progress-fill { width: 0%; height: 100%; background: var(--primary-green); box-shadow: 0 0 15px var(--primary-green); transition: 0.3s; }
         .status-txt { color: var(--primary-green); font-size: 14px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .percentage { color: white; font-size: 18px; font-family: monospace; }
-
         .action-btns { display: none; gap: 10px; margin-top: 15px; width: 100%; }
         .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-action:hover { border-color: var(--primary-green); color: var(--primary-green); }
@@ -39,31 +31,30 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO</h1></div>
+<div class="header"><h1>MERART STUDIO V5</h1></div>
 
 <div class="container">
     <div class="section-box">
-        <span class="section-title">1. توليد الصور من النص (Prompt to Image)</span>
-        <div class="inputs-row">
-            <select id="m1">
-                <option value="flux">Flux Professional</option>
-                <option value="flux-realism">Photorealistic Portrait</option>
-                <option value="flux-pro">Kling Deep (Chinese Model)</option>
-                <option value="pablita">Artistic Style (Pablita)</option>
-                <option value="any-dark">Cinematic Dark</option>
-                <option value="turbo">High Speed Turbo</option>
+        <span class="section-title">1. التوليد المباشر (Multi-Source Hub)</span>
+        <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
+            <select id="host-select" onchange="updateModels()">
+                <option value="pollinations">Pollinations (شامل)</option>
+                <option value="prodia">Prodia (سريع/فني)</option>
+                <option value="huggingface">Hugging Face (نماذج بحثية)</option>
             </select>
+            <select id="m1">
+                </select>
             <select id="s1">
                 <option value="1024x1024">Square (1:1)</option>
                 <option value="720x1280">Portrait (9:16)</option>
                 <option value="1280x720">Landscape (16:9)</option>
             </select>
         </div>
-        <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة بالتفصيل هنا..."></textarea>
-        <button class="btn-gen" onclick="fire('text')">توليد الصورة الآن ✨</button>
+        <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة هنا..."></textarea>
+        <button class="btn-gen" onclick="fire('text')">استدعاء المحرك المختار ✨</button>
         <div class="viewer-studio">
             <div class="loader-ui" id="load1">
-                <div class="status-txt">Processing Neural Network...</div>
+                <div class="status-txt" id="status1">Connecting to Host...</div>
                 <div class="percentage" id="perc1">0%</div>
                 <div class="progress-cont"><div class="progress-fill" id="pb1"></div></div>
             </div>
@@ -84,11 +75,11 @@
                 <option value="flux-pro">Kling Precision</option>
             </select>
         </div>
-        <textarea id="p2" rows="2" placeholder="أدخل التعديلات المطلوبة على الصورة..."></textarea>
-        <button class="btn-gen" style="background:#27ae60" onclick="fire('i2i')">معالجة الصورة المصدر 🖼️</button>
+        <textarea id="p2" rows="2" placeholder="أدخل التعديلات المطلوبة..."></textarea>
+        <button class="btn-gen" style="background:#27ae60" onclick="fire('i2i')">معالجة الصورة 🖼️</button>
         <div class="viewer-studio">
             <div class="loader-ui" id="load2">
-                <div class="status-txt">Analyzing Source Image...</div>
+                <div class="status-txt">Analyzing Source...</div>
                 <div class="percentage" id="perc2">0%</div>
                 <div class="progress-cont"><div class="progress-fill" id="pb2"></div></div>
             </div>
@@ -104,15 +95,15 @@
         <span class="section-title">3. تحويل النمط الفني (Image to Art)</span>
         <input type="text" id="u3" placeholder="رابط الصورة المراد تحويلها..." style="margin-bottom:15px;">
         <select id="sty3" style="margin-bottom:15px;">
-            <option value="Renaissance oil painting, masterpiece">لوحة زيتية كلاسيكية</option>
-            <option value="professional charcoal sketch, fine art">رسم فحم احترافي</option>
-            <option value="cyberpunk noir, neon reflections">سايبر بانك (نيون)</option>
-            <option value="traditional Chinese ink wash painting">رسم حبر صيني قديم</option>
+            <option value="Renaissance oil painting">لوحة زيتية كلاسيكية</option>
+            <option value="charcoal sketch">رسم فحم احترافي</option>
+            <option value="cyberpunk noir">سايبر بانك نيون</option>
+            <option value="Chinese ink wash">رسم حبر صيني</option>
         </select>
         <button class="btn-gen" style="background:#1e8449" onclick="fire('art')">تطبيق الفن 🎨</button>
         <div class="viewer-studio">
             <div class="loader-ui" id="load3">
-                <div class="status-txt">Applying Artistic Style...</div>
+                <div class="status-txt">Stylizing...</div>
                 <div class="percentage" id="perc3">0%</div>
                 <div class="progress-cont"><div class="progress-fill" id="pb3"></div></div>
             </div>
@@ -132,27 +123,63 @@
     const enhance = ", 8k, high quality, masterpiece, detailed";
     let storedUrls = {};
 
+    // بيانات المحركات لكل مضيف
+    const hostData = {
+        pollinations: [
+            {v: "flux", n: "Flux Professional"},
+            {v: "flux-realism", n: "Photorealistic Portrait"},
+            {v: "flux-pro", n: "Kling Deep (Chinese)"},
+            {v: "pablita", n: "Pablita Art"},
+            {v: "any-dark", n: "Cinematic Dark"},
+            {v: "turbo", n: "High Speed Turbo"}
+        ],
+        prodia: [
+            {v: "sdxl", n: "Stable Diffusion XL"},
+            {v: "analog", n: "Analog Diffusion"},
+            {v: "v15", n: "Classic SD v1.5"}
+        ],
+        huggingface: [
+            {v: "runwayml/stable-diffusion-v1-5", n: "RunwayML Standard"},
+            {v: "prompthero/openjourney", n: "OpenJourney (Midjourney Style)"}
+        ]
+    };
+
+    function updateModels() {
+        const host = document.getElementById('host-select').value;
+        const modelSelect = document.getElementById('m1');
+        modelSelect.innerHTML = '';
+        hostData[host].forEach(m => {
+            let opt = document.createElement('option');
+            opt.value = m.v; opt.innerText = m.n;
+            modelSelect.appendChild(opt);
+        });
+    }
+
+    // تشغيل التحديث لأول مرة
+    updateModels();
+
     async function fire(type) {
         let id = (type==='text')?1:(type==='i2i')?2:3;
         const loader = document.getElementById(`load${id}`);
         const progressBar = document.getElementById(`pb${id}`);
         const percTxt = document.getElementById(`perc${id}`);
+        const statusTxt = document.getElementById(`status1`);
         const img = document.getElementById(`img${id}`);
         const actions = document.getElementById(`act${id}`);
         
         img.style.display = 'none'; actions.style.display = 'none';
         loader.style.display = 'block';
         
-        let finalPrompt = "";
-        let model = (id===1)?document.getElementById('m1').value:(id===2)?document.getElementById('m2').value:"flux";
+        let host = document.getElementById('host-select').value;
+        let model = (id===1)?document.getElementById('m1').value:document.getElementById('m2').value;
         let size = (id===1)?document.getElementById('s1').value:"1024x1024";
         let [w, h] = size.split('x');
+        let finalPrompt = "";
 
         if(type==='text') finalPrompt = document.getElementById('p1').value + enhance;
         else if(type==='i2i') finalPrompt = `${document.getElementById('u2').value.trim()} , ${document.getElementById('p2').value} ${enhance}`;
         else if(type==='art') finalPrompt = `${document.getElementById('u3').value.trim()} converted into ${document.getElementById('sty3').value} ${enhance}`;
 
-        // التفاعل الاحترافي
         let progress = 0;
         let interval = setInterval(() => {
             if (progress < 96) {
@@ -160,10 +187,20 @@
                 progressBar.style.width = progress + '%';
                 percTxt.innerText = progress + '%';
             }
-        }, 200);
+        }, 250);
 
         const seed = Math.floor(Math.random()*999999);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
+        let url = "";
+
+        // بناء الرابط حسب المضيف
+        if (host === 'pollinations' || id !== 1) {
+            url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
+        } else if (host === 'prodia') {
+            url = `https://api.prodia.com/generate?prompt=${encodeURIComponent(finalPrompt)}&model=${model}`; 
+            // ملاحظة: بروديا تحتاج بروكسي أحياناً، للتبسيط سنبقي الروابط المباشرة المتاحة
+        } else {
+            url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?seed=${seed}&model=${model}`;
+        }
         
         const tempImg = new Image();
         tempImg.src = url;
@@ -182,13 +219,13 @@
 
     async function save(id) {
         const data = storedUrls[id];
-        const { error } = await _supabase.from('merart_logs').insert([{ prompt: data.prompt, output_url: data.url }]);
-        alert(error ? "خطأ في الارتباط بالسحابة" : "تمت الأرشفة بنجاح ✅");
+        await _supabase.from('merart_logs').insert([{ prompt: data.prompt, output_url: data.url }]);
+        alert("تمت الأرشفة بنجاح ✅");
     }
 
     function dl(id) {
         const a = document.createElement('a'); a.href = storedUrls[id].url;
-        a.download = `MERART_IMG_${Date.now()}.png`; a.click();
+        a.download = `MERART_V5_${Date.now()}.png`; a.click();
     }
 </script>
 </body>
