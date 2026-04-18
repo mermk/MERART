@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART V5.3 - تحديث الرعب والواقعية</title>
+    <title>MERART V5.3 - النسخة الكاملة والمطورة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -120,7 +120,6 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
-    // محسنات جودة "الرعب" (Ultra-Detailing Tags)
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
     const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
 
@@ -131,6 +130,8 @@
             {v: "flux-pro", n: "Flux.1 [pro] (الرتبة العليا)"},
             {v: "flux", n: "Flux Professional (Base)"},
             {v: "flux-realism", n: "Flux Realism (Extreme Skin)"},
+            {v: "flux-pro", n: "Kling Deep (Chinese)"},
+            {v: "pablita", n: "Pablita Art Style"},
             {v: "flux-anime", n: "Flux Anime Style"},
             {v: "any-dark", n: "Cinematic Dark"},
             {v: "turbo", n: "Turbo Speed"}
@@ -138,12 +139,13 @@
         huggingface: [
             {v: "cagliostrolab/animagine-xl-3.1", n: "Illustrious / Animagine XL"},
             {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Diffusion V6 XL"},
-            {v: "prompthero/openjourney", n: "OpenJourney"}
+            {v: "prompthero/openjourney", n: "OpenJourney (Midjourney)"}
         ],
         prodia: [
             {v: "realistic-vision-v6", n: "Realistic Vision V6 (Civitai)"},
             {v: "dreamshaper-xl", n: "DreamShaper XL"},
-            {v: "absolute-reality", n: "Absolute Reality"}
+            {v: "absolute-reality", n: "Absolute Reality"},
+            {v: "sdxl-1.0", n: "Standard SDXL"}
         ]
     };
 
@@ -177,7 +179,6 @@
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
         
-        // ذكاء حقن البرومبت السلبي والإيجابي لتحقيق جودة الصور المرفقة
         let finalPrompt = "";
         if(model.includes('pony')) {
             finalPrompt = `score_9, score_8_up, score_7_up, ${rawPrompt} ${qualityBoost}`;
@@ -212,7 +213,6 @@
                 loader.style.display = 'none';
                 img.src = url; img.style.display = 'block';
                 actions.style.display = 'flex';
-                // تخزين البيانات شاملة الموديل والسلبي للسجل المطور
                 storedUrls[id] = { url, prompt: finalPrompt, model: model, seed: seed, negative: negPrompt };
             }, 400);
         };
