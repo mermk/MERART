@@ -11,6 +11,12 @@
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 700px; padding: 10px; }
         .header h1 { color: var(--primary-gold); letter-spacing: 8px; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 10px rgba(212, 175, 55, 0.3); }
         .container { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
+        
+        /* إضافة ستايل أزرار المقاسات */
+        .size-selector { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 14px; }
+        .size-btn.active { border-color: var(--primary-gold); color: var(--primary-gold); background: #050505; box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); }
+
         textarea { width: 100%; padding: 15px; background: #050505; border: 1px solid #333; color: white; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
         textarea:focus { border-color: var(--primary-gold); outline: none; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
         
@@ -21,10 +27,9 @@
         .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
 
         #result-box { margin-top: 25px; min-height: 450px; border: 1px solid #222; background: #050505; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
-        img { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; }
+        img { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
         img.loaded { opacity: 1; }
         
-        /* Progressive Loader */
         .loader-wrapper { display: none; width: 80%; text-align: center; }
         .progress-container { width: 100%; height: 8px; background: #1a1a1a; border-radius: 10px; margin: 20px 0; overflow: hidden; position: relative; border: 1px solid #333; }
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%); box-shadow: 0 0 15px var(--primary-gold); transition: width 0.4s ease; }
@@ -45,7 +50,14 @@
 <div class="container">
     <div class="mode-title">محرك الصور الاحترافية <br> (4K & Ultra Realism)</div>
 
-    <textarea id="promptInput" rows="4" placeholder="اوصف لوحتك هنا باللغة العربية أو الإنجليزية.. (مثلاً: وجه حقيقي جداً، تفاصيل عيون حادة)"></textarea>
+    <div style="text-align: center; color: var(--primary-gold); margin-bottom: 10px; font-size: 0.9em; font-weight: bold;">أبعاد اللوحة:</div>
+    <div class="size-selector">
+        <button class="size-btn active" onclick="setSize(1024, 1024, this)">مربع (1:1)</button>
+        <button class="size-btn" onclick="setSize(720, 1280, this)">طولي (كامل)</button>
+        <button class="size-btn" onclick="setSize(1280, 720, this)">عرضي (سينمائي)</button>
+    </div>
+
+    <textarea id="promptInput" rows="4" placeholder="اوصف لوحتك هنا باللغة العربية أو الإنجليزية.."></textarea>
     
     <button class="btn-main" id="genBtn" onclick="generate()">استحضار الفن الاحترافي ✨</button>
 
@@ -57,7 +69,7 @@
             </div>
             <div class="timer-text" id="timer">الموقت: 0 ثانية</div>
         </div>
-        <p id="placeholder" style="color: #444; text-align:center;">بانتظار لمستك الإبداعية يا "حمودي"... <br> (تلميح: اكتب "High Resolution" للحصول على أفضل دقة)</p>
+        <p id="placeholder" style="color: #444; text-align:center;">بانتظار لمستك الإبداعية يا "حمودي"...</p>
     </div>
 
     <div class="action-btns" id="actions">
@@ -74,6 +86,17 @@
     let lastUrl = '';
     let timerInterval;
     let progressInterval;
+    
+    // متغيرات الأبعاد الجديدة
+    let currentW = 1024;
+    let currentH = 1024;
+
+    function setSize(w, h, btn) {
+        currentW = w;
+        currentH = h;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
 
     function resetUI() {
         const box = document.getElementById('result-box');
@@ -98,7 +121,6 @@
         const genBtn = document.getElementById('genBtn');
         const box = document.getElementById('result-box');
         
-        // Setup UI for generation
         const old = box.querySelector('img'); if(old) old.remove();
         document.getElementById('placeholder').style.display = 'none';
         document.getElementById('actions').style.display = 'none';
@@ -117,7 +139,6 @@
             "تقريباً خلصنا، انتظر السحر..."
         ];
 
-        // Timer Logic
         timerInterval = setInterval(() => {
             seconds++;
             document.getElementById('timer').innerText = `الموقت: ${seconds} ثانية`;
@@ -127,25 +148,24 @@
             }
             if (seconds > 120) {
                 resetUI();
-                alert("السيرفر تأخر هواية! جرب تضغط توليد مرة ثانية.");
+                alert("السيرفر تأخر هواية!");
             }
         }, 1000);
 
-        // Progress Bar Logic
         progressInterval = setInterval(() => {
             if (progress < 98) {
-                progress += 1.5; // السرعة تقديرية
+                progress += 1.5;
                 progressBar.style.width = progress + '%';
             }
         }, 400);
 
         try {
             const seed = Math.floor(Math.random() * 999999);
-            // البهارات الفنية المخفية بالكود
+            // رجعتلك بهاراتك المقدسة كاملة
             const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, dramatic atmosphere, cinematic lighting, masterpiece, 8k, ultra-realism";
             
-            // رابط الموديل الأقوى مع البهارات
-            lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + enhanceKeywords)}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux&enhance=true`;
+            // الرابط هسة صار ياخذ الـ currentW والـ currentH اللي تختارهم
+            lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + enhanceKeywords)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=flux&enhance=true`;
             
             const img = new Image();
             img.src = lastUrl;
@@ -165,7 +185,7 @@
             img.onerror = () => { throw new Error(); };
         } catch (e) {
             resetUI();
-            alert("صارت مشكلة بالمحرك، جرب مرة ثانية!");
+            alert("صارت مشكلة بالمحرك!");
         }
     }
 
@@ -174,18 +194,15 @@
         const { error } = await _supabase
             .from('merart_logs')
             .insert([{ prompt: prompt, content_type: 'Image (Pro)', output_url: lastUrl }]);
-        
         if (error) alert("مشكلة بالحفظ: " + error.message);
         else alert("تم الحفظ في مخزن MERART بنجاح! 🦉🎨");
     }
 
     function download() {
         const link = document.createElement('a');
-        link.href = lastUrl;
-        link.target = '_blank';
+        link.href = lastUrl; link.target = '_blank';
         link.download = `MERART_${Date.now()}.png`;
-        document.body.appendChild(link);
-        link.click();
+        document.body.appendChild(link); link.click();
         document.body.removeChild(link);
     }
 </script>
