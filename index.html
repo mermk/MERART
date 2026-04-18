@@ -3,40 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART V3 - المنصة الاحترافية المتكاملة</title>
+    <title>MERART V3.5 - المنصة الشاملة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-bg: #0a0a0a; --card-bg: #111; --text: #e0e0e0; }
         body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-gold); letter-spacing: 8px; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 10px rgba(212, 175, 55, 0.3); }
-        
         .container { width: 100%; max-width: 850px; }
         .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .section-title { color: var(--primary-gold); font-weight: bold; margin-bottom: 15px; display: block; border-right: 4px solid var(--primary-gold); padding-right: 12px; font-size: 1.1em; }
-        
         .grid-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        select, input[type="text"], textarea { width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; box-sizing: border-box; }
+        select, input[type="text"], textarea { width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; }
         select:focus, input:focus, textarea:focus { border-color: var(--primary-gold); }
-
         .size-selector { display: flex; gap: 8px; margin-bottom: 15px; }
-        .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: bold; }
+        .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 12px; font-weight: bold; }
         .size-btn.active { border-color: var(--primary-gold); color: var(--primary-gold); background: #050505; }
-
-        .btn-gen { width: 100%; padding: 15px; background: var(--primary-gold); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; color: black; transition: 0.3s; }
-        .btn-gen:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
-
-        #result-box { margin-top: 25px; min-height: 500px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden; }
-        img { max-width: 100%; height: auto; border-radius: 10px; display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
+        .btn-gen { width: 100%; padding: 15px; background: var(--primary-gold); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; color: black; }
+        #result-box { margin-top: 25px; min-height: 500px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
+        img { max-width: 100%; height: auto; border-radius: 10px; display: block; opacity: 0; transition: opacity 0.5s ease-in; }
         img.loaded { opacity: 1; }
-        
         .loader-wrapper { display: none; width: 80%; text-align: center; }
         .progress-bar { width: 0%; height: 8px; background: var(--primary-gold); border-radius: 10px; transition: 0.4s; }
-        .status-msg { color: var(--primary-gold); font-weight: bold; margin-bottom: 10px; }
-
         .action-btns { display: none; gap: 12px; margin-top: 20px; width: 100%; }
-        .btn-sec { flex: 1; padding: 14px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .btn-sec:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
+        .btn-sec { flex: 1; padding: 14px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -48,13 +38,16 @@
         <span class="section-title">1. التوليد المباشر (Prompt to Image)</span>
         <div class="grid-settings">
             <select id="model1">
-                <option value="flux">Flux (واقعية فائقة)</option>
-                <option value="turbo">Turbo (سرعة عالية)</option>
+                <option value="flux">Flux (واقعية فائقة - الأفضل)</option>
+                <option value="flux-realism">Flux Realism (بورتريه واقعي)</option>
+                <option value="any-dark">Any Dark (غموض وسينمائي)</option>
+                <option value="turbo">Turbo (سرعة خاطفة)</option>
+                <option value="pablita">Pablita (لمسة فنية إيطالية)</option>
             </select>
             <div class="size-selector" style="margin-bottom:0;">
                 <button class="size-btn active" onclick="setSize(1024, 1024, this)">1:1</button>
                 <button class="size-btn" onclick="setSize(720, 1280, this)">طولي</button>
-                <button class="size-btn" onclick="setSize(1280, 720, this)">سينمائي</button>
+                <button class="size-btn" onclick="setSize(1280, 720, this)">عرضي</button>
             </div>
         </div>
         <textarea id="prompt1" rows="2" placeholder="اوصف لوحتك هنا يا حمودي..."></textarea>
@@ -64,7 +57,7 @@
     <div class="section-box">
         <span class="section-title">2. التوليد من صورة (Image to Image)</span>
         <input type="text" id="url2" placeholder="حط رابط الصورة المصدر هنا..." style="margin-bottom:15px;">
-        <textarea id="prompt2" rows="2" placeholder="شنو التعديل اللي تريده على الصورة؟"></textarea>
+        <textarea id="prompt2" rows="2" placeholder="شنو التعديل أو الإضافة المطلوبة؟"></textarea>
         <button class="btn-gen" style="background:#b89831" onclick="handleGenerate('i2i')">توليد من المصدر 🖼️</button>
     </div>
 
@@ -72,22 +65,23 @@
         <span class="section-title">3. تحويل النمط الفني (Image to Art)</span>
         <input type="text" id="url3" placeholder="رابط الصورة المراد تحويلها..." style="margin-bottom:15px;">
         <select id="style3">
-            <option value="classic oil painting, masterpiece, museum quality">لوحة زيتية كلاسيكية</option>
-            <option value="detailed charcoal pencil sketch, artistic shading">رسم فحم يدوي</option>
-            <option value="cyberpunk aesthetic, neon lighting, futuristic">سايبر بانك نيون</option>
-            <option value="high-quality anime style, studio ghibli vibes">انمي احترافي</option>
+            <option value="Renaissance oil painting, museum masterpiece">لوحة زيتية من عصر النهضة</option>
+            <option value="professional charcoal sketch, fine art texture">رسم فحم يدوي احترافي</option>
+            <option value="dark noir cyberpunk, neon reflections">سايبر بانك (نوار)</option>
+            <option value="Studio Ghibli aesthetic, anime background">نمط استوديو غيبلي (انمي)</option>
+            <option value="Ukiyo-e woodblock print style">رسم ياباني قديم (يوكيو-إيه)</option>
         </select>
         <button class="btn-gen" style="background:#8e7425" onclick="handleGenerate('art')">تحويل النمط فجأة 🎨</button>
     </div>
 
     <div id="result-box">
         <div class="loader-wrapper" id="loaderWrapper">
-            <div class="status-msg">جاري معالجة البيانات يا "محمديتي"...</div>
+            <div style="color:var(--primary-gold); margin-bottom:10px;">جاري التواصل مع الخوادم...</div>
             <div style="width:100%; background:#1a1a1a; height:8px; border-radius:10px;">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
         </div>
-        <p id="placeholder" style="color: #444;">النتائج تظهر هنا بكل هيبتها</p>
+        <p id="placeholder" style="color: #444;">النتائج تظهر هنا</p>
     </div>
 
     <div class="action-btns" id="actions">
@@ -103,7 +97,7 @@
 
     let lastUrl = '';
     let currentW = 1024, currentH = 1024;
-    const enhance = ", 8k resolution, perfect anatomy, ultra realistic, highly detailed, masterpiece";
+    const enhance = ", 8k, photorealistic, perfect anatomy, masterpiece, highly detailed";
 
     function setSize(w, h, btn) {
         currentW = w; currentH = h;
@@ -122,22 +116,18 @@
         actions.style.display = 'none';
 
         let finalPrompt = "";
-        let model = "flux";
+        let model = document.getElementById('model1').value;
         const seed = Math.floor(Math.random() * 999999);
 
         if (type === 'text') {
             finalPrompt = document.getElementById('prompt1').value + enhance;
-            model = document.getElementById('model1').value;
         } else if (type === 'i2i') {
-            const url = document.getElementById('url2').value.trim();
-            finalPrompt = `${url} ${document.getElementById('prompt2').value} ${enhance}`;
+            finalPrompt = `${document.getElementById('url2').value.trim()} , ${document.getElementById('prompt2').value} ${enhance}`;
         } else if (type === 'art') {
-            const url = document.getElementById('url3').value.trim();
-            const style = document.getElementById('style3').value;
-            finalPrompt = `${url} convert into ${style} ${enhance}`;
+            finalPrompt = `${document.getElementById('url3').value.trim()} converted to ${document.getElementById('style3').value} ${enhance}`;
         }
 
-        lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&model=${model}&nologo=true`;
+        lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&model=${model}&nologo=true&enhance=true`;
 
         const img = new Image();
         img.src = lastUrl;
@@ -147,20 +137,16 @@
             box.appendChild(img);
             actions.style.display = 'flex';
         };
-        img.onerror = () => {
-            alert("فشل السيرفر! تأكد من الرابط أو المحرك.");
-            loader.style.display = 'none';
-        };
+        img.onerror = () => { alert("فشل الاتصال بالمصدر!"); loader.style.display = 'none'; };
     }
 
     async function saveToCloud() {
-        const { error } = await _supabase.from('merart_logs').insert([{ prompt: "V3 Operation", content_type: 'Image V3', output_url: lastUrl }]);
-        alert(error ? "خطأ بالحفظ" : "تم الحفظ في الأرشيف! 🦉🎨");
+        const { error } = await _supabase.from('merart_logs').insert([{ prompt: "V3.5 Multi-Model", output_url: lastUrl }]);
+        alert(error ? "خطأ بالحفظ" : "تم الحفظ بنجاح! 🦉");
     }
 
     function download() {
-        const link = document.createElement('a'); link.href = lastUrl;
-        link.download = `MERART_V3_${Date.now()}.png`; link.click();
+        const a = document.createElement('a'); a.href = lastUrl; a.download = `MERART_${Date.now()}.png`; a.click();
     }
 </script>
 </body>
