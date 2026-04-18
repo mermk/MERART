@@ -25,7 +25,6 @@
         .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
         .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        /* تعديل جوهري هنا لمنع التمطيط */
         #result-box { margin-top: 25px; min-height: 450px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden;}
         img { max-width: 100%; max-height: 85vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
         img.loaded { opacity: 1; }
@@ -136,7 +135,8 @@
 
         try {
             const seed = Math.floor(Math.random() * 999999);
-            const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, cinematic lighting, masterpiece, 8k, ultra-realism";
+            // البهارات المقدسة مع إضافة (Perfect anatomy) لمنع التشوه
+            const enhanceKeywords = ", high resolution, photorealistic, extremely detailed eyes, sharp focus, cinematic lighting, masterpiece, 8k, ultra-realism, (perfect anatomy, straight limbs, no deformities, anatomically correct)";
             lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + enhanceKeywords)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=flux&enhance=true`;
             
             const img = new Image();
