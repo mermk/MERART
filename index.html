@@ -3,42 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART - المنصة الاحترافية V2</title>
+    <title>MERART - المنصة الاحترافية V2.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-bg: #0a0a0a; --card-bg: #111; --text: #e0e0e0; }
         body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-gold); letter-spacing: 8px; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 10px rgba(212, 175, 55, 0.3); }
-        
         .container { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 850px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
-        
         .section-label { color: var(--primary-gold); font-weight: bold; margin: 15px 0 8px; font-size: 0.9em; display: block; text-align: center; }
-        
         .grid-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        select, input[type="text"] { width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; }
+        select, input[type="text"] { width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; box-sizing: border-box; }
         select:focus, input:focus { border-color: var(--primary-gold); }
-
         .size-selector { display: flex; gap: 8px; margin-bottom: 15px; }
         .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: bold; }
         .size-btn.active { border-color: var(--primary-gold); color: var(--primary-gold); background: #050505; }
-
         textarea { width: 100%; padding: 15px; background: #050505; border: 1px solid #333; color: white; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; resize: vertical; }
-        
-        .btn-main { width: 100%; padding: 18px; background: var(--primary-gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; color: black; transition: 0.3s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3); }
-
+        .btn-main { width: 100%; padding: 18px; background: var(--primary-gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; color: black; transition: 0.3s; }
         #result-box { margin-top: 25px; min-height: 500px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
         img { max-width: 100%; height: auto; border-radius: 10px; display: block; opacity: 0; transition: opacity 0.5s ease-in; }
         img.loaded { opacity: 1; }
-        
         .loader-wrapper { display: none; width: 80%; text-align: center; }
-        .progress-bar { width: 0%; height: 8px; background: var(--primary-gold); border-radius: 10px; transition: 0.4s; box-shadow: 0 0 10px var(--primary-gold); }
-        .status-msg { color: var(--primary-gold); font-weight: bold; margin-bottom: 10px; }
-
+        .progress-bar { width: 0%; height: 8px; background: var(--primary-gold); border-radius: 10px; transition: 0.4s; }
         .action-btns { display: none; gap: 12px; margin-top: 20px; width: 100%; }
         .btn-sec { flex: 1; padding: 14px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .btn-sec:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
     </style>
 </head>
 <body>
@@ -52,7 +40,7 @@
             <select id="modelSelect">
                 <option value="flux">Flux (واقعية فائقة)</option>
                 <option value="turbo">Turbo (سرعة عالية)</option>
-                <option value="pablita">Pablita (لمسة فنية)</option>
+                <option value="unity">Unity (متوازن)</option>
             </select>
         </div>
         <div>
@@ -68,7 +56,7 @@
     </div>
 
     <span class="section-label">رابط صورة المصدر (Image-to-Image / اختياري)</span>
-    <input type="text" id="imgUrlInput" placeholder="حط رابط صورتك هنا يا حمودي...">
+    <input type="text" id="imgUrlInput" placeholder="حط رابط صورتك المباشر هنا...">
 
     <span class="section-label">أبعاد اللوحة</span>
     <div class="size-selector">
@@ -83,7 +71,7 @@
 
     <div id="result-box">
         <div class="loader-wrapper" id="loaderWrapper">
-            <div class="status-msg" id="statusText">جاري تهيئة الموديل...</div>
+            <div class="status-msg" id="statusText" style="color:var(--primary-gold); margin-bottom:10px;">جاري التواصل مع الأبعاد الفنية...</div>
             <div style="width:100%; background:#1a1a1a; height:8px; border-radius:10px;">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
@@ -106,10 +94,10 @@
     let currentW = 1024, currentH = 1024;
 
     const styles = {
-        oil: "masterpiece, oil painting on canvas, heavy brushstrokes, classical art style",
-        sketch: "hand-drawn pencil sketch, charcoal shading, rough texture, artistic lines",
-        cyber: "cyberpunk aesthetic, neon glowing lights, futuristic atmosphere, high contrast",
-        anime: "high-quality anime illustration, vibrant colors, sharp lines, studio ghibli style"
+        oil: "highly detailed classical oil painting, visible brushstrokes, canvas texture, museum quality",
+        sketch: "professional charcoal pencil sketch, hand-drawn on textured paper, artistic shading",
+        cyber: "cyberpunk 2077 style, neon vibrant lighting, cinematic futuristic city background",
+        anime: "modern high-quality anime style, vivid colors, clean linework, masterpiece illustration"
     };
 
     function setSize(w, h, btn) {
@@ -120,34 +108,32 @@
 
     async function generate() {
         const userPrompt = document.getElementById('promptInput').value;
-        const sourceImg = document.getElementById('imgUrlInput').value;
+        const sourceImg = document.getElementById('imgUrlInput').value.trim();
         const selectedModel = document.getElementById('modelSelect').value;
         const selectedStyle = document.getElementById('styleSelect').value;
-
-        if (!userPrompt && selectedStyle === 'none' && !sourceImg) return alert("حط وصف أو صورة يا بطل!");
 
         const loaderWrap = document.getElementById('loaderWrapper');
         const box = document.getElementById('result-box');
         const genBtn = document.getElementById('genBtn');
         
-        // تنظيف المكان
         const oldImg = box.querySelector('img'); if(oldImg) oldImg.remove();
         document.getElementById('placeholder').style.display = 'none';
         loaderWrap.style.display = 'block';
         genBtn.disabled = true;
 
-        // بناء البرومبت الذكي
-        let finalPrompt = userPrompt;
-        if (selectedStyle !== 'none') finalPrompt += ", " + styles[selectedStyle];
+        // بناء البرومبت بصيغة يفهمها السيرفر بدون أخطاء
+        let corePrompt = userPrompt || "a masterpiece";
+        if (selectedStyle !== 'none') corePrompt += ", " + styles[selectedStyle];
         
-        // إضافة بهارات التشريح والواقعية بشكل آلي
-        finalPrompt += ", (perfect anatomy, masterpiece, 8k, highly detailed, sharp focus)";
-        
-        // دمج الصورة إذا وجدت
-        if (sourceImg) finalPrompt = `${sourceImg} source image, ${finalPrompt}`;
+        // إضافة جودة التشريح والواقعية كخلفية ثابتة
+        corePrompt += ", 8k resolution, perfect anatomy, ultra realistic, highly detailed";
+
+        // إذا اكو رابط صورة، ندمجه بطريقة (URL + Prompt) الصريحة
+        let finalInput = sourceImg ? `${sourceImg} ${corePrompt}` : corePrompt;
 
         const seed = Math.floor(Math.random() * 999999);
-        lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&nologo=true&model=${selectedModel}&enhance=true`;
+        // تم تعديل بناء الرابط ليكون أكثر استقراراً
+        lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalInput)}?width=${currentW}&height=${currentH}&seed=${seed}&model=${selectedModel}&nologo=true`;
 
         const img = new Image();
         img.src = lastUrl;
@@ -158,13 +144,18 @@
             document.getElementById('actions').style.display = 'flex';
             genBtn.disabled = false;
         };
-        img.onerror = () => { alert("خطأ بالسيرفر!"); genBtn.disabled = false; };
+        img.onerror = () => { 
+            alert("السيرفر رفض الطلب! تأكد من رابط الصورة أو جرب موديل ثاني."); 
+            loaderWrap.style.display = 'none';
+            document.getElementById('placeholder').style.display = 'block';
+            genBtn.disabled = false; 
+        };
     }
 
     async function saveToCloud() {
         const prompt = document.getElementById('promptInput').value || "Style Transfer";
-        const { error } = await _supabase.from('merart_logs').insert([{ prompt: prompt, content_type: 'Image V2', output_url: lastUrl }]);
-        alert(error ? "خطأ بالحفظ" : "تم الحفظ في أرشيف آل مير! 🦉");
+        const { error } = await _supabase.from('merart_logs').insert([{ prompt: prompt, content_type: 'Image V2.1', output_url: lastUrl }]);
+        alert(error ? "خطأ بالحفظ" : "تم الحفظ! 🦉");
     }
 
     function download() {
