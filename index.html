@@ -3,30 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART - المنصة الاحترافية V2.1</title>
+    <title>MERART V3 - المنصة الاحترافية المتكاملة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-bg: #0a0a0a; --card-bg: #111; --text: #e0e0e0; }
         body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 900px; padding: 10px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-gold); letter-spacing: 8px; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 10px rgba(212, 175, 55, 0.3); }
-        .container { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 850px; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #222; }
-        .section-label { color: var(--primary-gold); font-weight: bold; margin: 15px 0 8px; font-size: 0.9em; display: block; text-align: center; }
+        
+        .container { width: 100%; max-width: 850px; }
+        .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .section-title { color: var(--primary-gold); font-weight: bold; margin-bottom: 15px; display: block; border-right: 4px solid var(--primary-gold); padding-right: 12px; font-size: 1.1em; }
+        
         .grid-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        select, input[type="text"] { width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; box-sizing: border-box; }
-        select:focus, input:focus { border-color: var(--primary-gold); }
+        select, input[type="text"], textarea { width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; box-sizing: border-box; }
+        select:focus, input:focus, textarea:focus { border-color: var(--primary-gold); }
+
         .size-selector { display: flex; gap: 8px; margin-bottom: 15px; }
         .size-btn { flex: 1; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: bold; }
         .size-btn.active { border-color: var(--primary-gold); color: var(--primary-gold); background: #050505; }
-        textarea { width: 100%; padding: 15px; background: #050505; border: 1px solid #333; color: white; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; resize: vertical; }
-        .btn-main { width: 100%; padding: 18px; background: var(--primary-gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; color: black; transition: 0.3s; }
-        #result-box { margin-top: 25px; min-height: 500px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
-        img { max-width: 100%; height: auto; border-radius: 10px; display: block; opacity: 0; transition: opacity 0.5s ease-in; }
+
+        .btn-gen { width: 100%; padding: 15px; background: var(--primary-gold); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; color: black; transition: 0.3s; }
+        .btn-gen:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+
+        #result-box { margin-top: 25px; min-height: 500px; border: 1px solid #222; background: #000; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; overflow: hidden; }
+        img { max-width: 100%; height: auto; border-radius: 10px; display: block; opacity: 0; transition: opacity 0.5s ease-in; object-fit: contain; }
         img.loaded { opacity: 1; }
+        
         .loader-wrapper { display: none; width: 80%; text-align: center; }
         .progress-bar { width: 0%; height: 8px; background: var(--primary-gold); border-radius: 10px; transition: 0.4s; }
+        .status-msg { color: var(--primary-gold); font-weight: bold; margin-bottom: 10px; }
+
         .action-btns { display: none; gap: 12px; margin-top: 20px; width: 100%; }
         .btn-sec { flex: 1; padding: 14px; border: 1px solid #333; background: #1a1a1a; color: white; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .btn-sec:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
     </style>
 </head>
 <body>
@@ -34,54 +44,55 @@
 <div class="header"><h1>MERART</h1></div>
 
 <div class="container">
-    <div class="grid-settings">
-        <div>
-            <span class="section-label">اختيار المحرك (Model)</span>
-            <select id="modelSelect">
+    <div class="section-box">
+        <span class="section-title">1. التوليد المباشر (Prompt to Image)</span>
+        <div class="grid-settings">
+            <select id="model1">
                 <option value="flux">Flux (واقعية فائقة)</option>
                 <option value="turbo">Turbo (سرعة عالية)</option>
-                <option value="unity">Unity (متوازن)</option>
             </select>
+            <div class="size-selector" style="margin-bottom:0;">
+                <button class="size-btn active" onclick="setSize(1024, 1024, this)">1:1</button>
+                <button class="size-btn" onclick="setSize(720, 1280, this)">طولي</button>
+                <button class="size-btn" onclick="setSize(1280, 720, this)">سينمائي</button>
+            </div>
         </div>
-        <div>
-            <span class="section-label">استوديو الأنماط (Art Style)</span>
-            <select id="styleSelect">
-                <option value="none">بدون نمط (واقعي)</option>
-                <option value="oil">لوحة زيتية كلاسيكية</option>
-                <option value="sketch">رسم فحم يدوي</option>
-                <option value="cyber">سايبر بانك نيون</option>
-                <option value="anime">انمي احترافي</option>
-            </select>
-        </div>
+        <textarea id="prompt1" rows="2" placeholder="اوصف لوحتك هنا يا حمودي..."></textarea>
+        <button class="btn-gen" onclick="handleGenerate('text')">استحضار النص ✨</button>
     </div>
 
-    <span class="section-label">رابط صورة المصدر (Image-to-Image / اختياري)</span>
-    <input type="text" id="imgUrlInput" placeholder="حط رابط صورتك المباشر هنا...">
-
-    <span class="section-label">أبعاد اللوحة</span>
-    <div class="size-selector">
-        <button class="size-btn active" onclick="setSize(1024, 1024, this)">مربع (1:1)</button>
-        <button class="size-btn" onclick="setSize(720, 1280, this)">طولي (كامل)</button>
-        <button class="size-btn" onclick="setSize(1280, 720, this)">سينمائي (عريض)</button>
+    <div class="section-box">
+        <span class="section-title">2. التوليد من صورة (Image to Image)</span>
+        <input type="text" id="url2" placeholder="حط رابط الصورة المصدر هنا..." style="margin-bottom:15px;">
+        <textarea id="prompt2" rows="2" placeholder="شنو التعديل اللي تريده على الصورة؟"></textarea>
+        <button class="btn-gen" style="background:#b89831" onclick="handleGenerate('i2i')">توليد من المصدر 🖼️</button>
     </div>
 
-    <textarea id="promptInput" rows="3" placeholder="اوصف خيالك هنا..."></textarea>
-    
-    <button class="btn-main" id="genBtn" onclick="generate()">استحضار الفن الاحترافي ✨</button>
+    <div class="section-box">
+        <span class="section-title">3. تحويل النمط الفني (Image to Art)</span>
+        <input type="text" id="url3" placeholder="رابط الصورة المراد تحويلها..." style="margin-bottom:15px;">
+        <select id="style3">
+            <option value="classic oil painting, masterpiece, museum quality">لوحة زيتية كلاسيكية</option>
+            <option value="detailed charcoal pencil sketch, artistic shading">رسم فحم يدوي</option>
+            <option value="cyberpunk aesthetic, neon lighting, futuristic">سايبر بانك نيون</option>
+            <option value="high-quality anime style, studio ghibli vibes">انمي احترافي</option>
+        </select>
+        <button class="btn-gen" style="background:#8e7425" onclick="handleGenerate('art')">تحويل النمط فجأة 🎨</button>
+    </div>
 
     <div id="result-box">
         <div class="loader-wrapper" id="loaderWrapper">
-            <div class="status-msg" id="statusText" style="color:var(--primary-gold); margin-bottom:10px;">جاري التواصل مع الأبعاد الفنية...</div>
+            <div class="status-msg">جاري معالجة البيانات يا "محمديتي"...</div>
             <div style="width:100%; background:#1a1a1a; height:8px; border-radius:10px;">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
         </div>
-        <p id="placeholder" style="color: #444;">بانتظار إبداعك يا "محمديتي"...</p>
+        <p id="placeholder" style="color: #444;">النتائج تظهر هنا بكل هيبتها</p>
     </div>
 
     <div class="action-btns" id="actions">
         <button class="btn-sec" onclick="download()">تنزيل 💾</button>
-        <button class="btn-sec" style="border-color:var(--primary-gold)" onclick="saveToCloud()">حفظ 🦉</button>
+        <button class="btn-sec" style="border-color:var(--primary-gold)" onclick="saveToCloud()">حفظ في أرشيف آل مير 🦉</button>
     </div>
 </div>
 
@@ -92,13 +103,7 @@
 
     let lastUrl = '';
     let currentW = 1024, currentH = 1024;
-
-    const styles = {
-        oil: "highly detailed classical oil painting, visible brushstrokes, canvas texture, museum quality",
-        sketch: "professional charcoal pencil sketch, hand-drawn on textured paper, artistic shading",
-        cyber: "cyberpunk 2077 style, neon vibrant lighting, cinematic futuristic city background",
-        anime: "modern high-quality anime style, vivid colors, clean linework, masterpiece illustration"
-    };
+    const enhance = ", 8k resolution, perfect anatomy, ultra realistic, highly detailed, masterpiece";
 
     function setSize(w, h, btn) {
         currentW = w; currentH = h;
@@ -106,61 +111,56 @@
         btn.classList.add('active');
     }
 
-    async function generate() {
-        const userPrompt = document.getElementById('promptInput').value;
-        const sourceImg = document.getElementById('imgUrlInput').value.trim();
-        const selectedModel = document.getElementById('modelSelect').value;
-        const selectedStyle = document.getElementById('styleSelect').value;
-
-        const loaderWrap = document.getElementById('loaderWrapper');
+    async function handleGenerate(type) {
+        const loader = document.getElementById('loaderWrapper');
         const box = document.getElementById('result-box');
-        const genBtn = document.getElementById('genBtn');
+        const actions = document.getElementById('actions');
         
         const oldImg = box.querySelector('img'); if(oldImg) oldImg.remove();
         document.getElementById('placeholder').style.display = 'none';
-        loaderWrap.style.display = 'block';
-        genBtn.disabled = true;
+        loader.style.display = 'block';
+        actions.style.display = 'none';
 
-        // بناء البرومبت بصيغة يفهمها السيرفر بدون أخطاء
-        let corePrompt = userPrompt || "a masterpiece";
-        if (selectedStyle !== 'none') corePrompt += ", " + styles[selectedStyle];
-        
-        // إضافة جودة التشريح والواقعية كخلفية ثابتة
-        corePrompt += ", 8k resolution, perfect anatomy, ultra realistic, highly detailed";
-
-        // إذا اكو رابط صورة، ندمجه بطريقة (URL + Prompt) الصريحة
-        let finalInput = sourceImg ? `${sourceImg} ${corePrompt}` : corePrompt;
-
+        let finalPrompt = "";
+        let model = "flux";
         const seed = Math.floor(Math.random() * 999999);
-        // تم تعديل بناء الرابط ليكون أكثر استقراراً
-        lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalInput)}?width=${currentW}&height=${currentH}&seed=${seed}&model=${selectedModel}&nologo=true`;
+
+        if (type === 'text') {
+            finalPrompt = document.getElementById('prompt1').value + enhance;
+            model = document.getElementById('model1').value;
+        } else if (type === 'i2i') {
+            const url = document.getElementById('url2').value.trim();
+            finalPrompt = `${url} ${document.getElementById('prompt2').value} ${enhance}`;
+        } else if (type === 'art') {
+            const url = document.getElementById('url3').value.trim();
+            const style = document.getElementById('style3').value;
+            finalPrompt = `${url} convert into ${style} ${enhance}`;
+        }
+
+        lastUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${currentW}&height=${currentH}&seed=${seed}&model=${model}&nologo=true`;
 
         const img = new Image();
         img.src = lastUrl;
         img.onload = () => {
-            loaderWrap.style.display = 'none';
+            loader.style.display = 'none';
             img.classList.add('loaded');
             box.appendChild(img);
-            document.getElementById('actions').style.display = 'flex';
-            genBtn.disabled = false;
+            actions.style.display = 'flex';
         };
-        img.onerror = () => { 
-            alert("السيرفر رفض الطلب! تأكد من رابط الصورة أو جرب موديل ثاني."); 
-            loaderWrap.style.display = 'none';
-            document.getElementById('placeholder').style.display = 'block';
-            genBtn.disabled = false; 
+        img.onerror = () => {
+            alert("فشل السيرفر! تأكد من الرابط أو المحرك.");
+            loader.style.display = 'none';
         };
     }
 
     async function saveToCloud() {
-        const prompt = document.getElementById('promptInput').value || "Style Transfer";
-        const { error } = await _supabase.from('merart_logs').insert([{ prompt: prompt, content_type: 'Image V2.1', output_url: lastUrl }]);
-        alert(error ? "خطأ بالحفظ" : "تم الحفظ! 🦉");
+        const { error } = await _supabase.from('merart_logs').insert([{ prompt: "V3 Operation", content_type: 'Image V3', output_url: lastUrl }]);
+        alert(error ? "خطأ بالحفظ" : "تم الحفظ في الأرشيف! 🦉🎨");
     }
 
     function download() {
-        const link = document.createElement('a'); link.href = lastUrl; link.target = '_blank';
-        link.download = `MERART_V2_${Date.now()}.png`; link.click();
+        const link = document.createElement('a'); link.href = lastUrl;
+        link.download = `MERART_V3_${Date.now()}.png`; link.click();
     }
 </script>
 </body>
