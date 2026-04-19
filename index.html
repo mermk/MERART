@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.3.0 - نسخة بوابة الأشباح</title>
+    <title>MERART STUDIO V7.4.0 - نسخة بوابة الأشباح (التحرر الخام)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -32,7 +32,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V7.3.0</h1></div>
+<div class="header"><h1>MERART STUDIO V7.4.0</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -171,9 +171,9 @@
             {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Realism v2 (Uncensored)"}
         ],
         ghost: [
-            {v: "flux", n: "GHOST RAW (تحرر فائق)"},
-            {v: "stablediffusionapi/juggernaut-xl-v9", n: "Juggernaut XL (No Filter)"},
-            {v: "any-dark", n: "Cinematic Ghost"}
+            {v: "flux-realism", n: "GHOST REALISM (بوابة الأشباح)"},
+            {v: "flux", n: "Flux RAW (No Filter)"},
+            {v: "any-dark", n: "Cinematic Dark (Extreme)"}
         ]
     };
 
@@ -226,12 +226,11 @@
             smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
         }
 
-        // إعداد البرومبت بناءً على نوع المحرك
         let finalPrompt = "";
         let activeNeg = negPrompt;
 
         if(host === 'nol' || host === 'ghost') {
-            finalPrompt = `photorealistic raw photo, masterpiece, 8k, highly detailed skin pores, sharp focus, cinematic lighting, ${smartPrompt}`;
+            finalPrompt = `unfiltered raw photography, hyper-realistic skin texture, visible pores, cinematic natural lighting, masterpiece, 8k, ${smartPrompt}`;
             activeNeg = nolBypassNeg;
         } else {
             finalPrompt = smartPrompt + qualityBoost;
@@ -252,10 +251,9 @@
         const seed = Math.floor(Math.random()*99999999);
         let url = "";
 
-        // بروتوكول التوليد للمحرك الخامس (GHOST) والمحرك الرابع (NOL)
         if(host === 'ghost') {
-             // المحرك الخامس يستخدم بروتوكول كسر الفلاتر التلقائي
-             url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&cached=false&safe=false`;
+             // بروتوكول GHOST الجديد: تحويل المسار وتفعيل وضع الواقعية الفائق
+             url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&cached=false&safe=false&realism=true&refine=true`;
         } else if(host === 'nol') {
              url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false&cached=false`;
         } else {
