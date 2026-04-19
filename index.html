@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.2.0 - نسخة التحرر الخام</title>
+    <title>MERART STUDIO V7.3.0 - نسخة بوابة الأشباح</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -32,7 +32,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V7.2.0</h1></div>
+<div class="header"><h1>MERART STUDIO V7.3.0</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -43,6 +43,7 @@
                 <option value="huggingface">Hugging Face (The Giants Era)</option>
                 <option value="prodia">Prodia (Civitai Legends)</option>
                 <option value="nol">NOL (بوابة التحرر المنفصلة - RAW)</option>
+                <option value="ghost">GHOST (بوابة الأشباح - التحرر المطلق)</option>
             </select>
             <select id="m1"></select>
             <select id="s1">
@@ -168,6 +169,11 @@
             {v: "stablediffusionapi/epicrealism-xl", n: "Realism Engine V5 (Civitai)"},
             {v: "stablediffusionapi/juggernaut-aftermath", n: "Juggernaut Aftermath (Raw)"},
             {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Realism v2 (Uncensored)"}
+        ],
+        ghost: [
+            {v: "flux", n: "GHOST RAW (تحرر فائق)"},
+            {v: "stablediffusionapi/juggernaut-xl-v9", n: "Juggernaut XL (No Filter)"},
+            {v: "any-dark", n: "Cinematic Ghost"}
         ]
     };
 
@@ -220,12 +226,16 @@
             smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
         }
 
-        // تحسين البرومبت للـ RAW في المحرك الرابع
-        let finalPrompt = (host === 'nol') 
-            ? `photorealistic raw photo, masterpiece, 8k, highly detailed skin pores, sharp focus, cinematic lighting, ${smartPrompt}`
-            : smartPrompt + qualityBoost;
-            
-        let activeNeg = (host === 'nol') ? nolBypassNeg : negPrompt;
+        // إعداد البرومبت بناءً على نوع المحرك
+        let finalPrompt = "";
+        let activeNeg = negPrompt;
+
+        if(host === 'nol' || host === 'ghost') {
+            finalPrompt = `photorealistic raw photo, masterpiece, 8k, highly detailed skin pores, sharp focus, cinematic lighting, ${smartPrompt}`;
+            activeNeg = nolBypassNeg;
+        } else {
+            finalPrompt = smartPrompt + qualityBoost;
+        }
 
         if(type==='i2i') finalPrompt = `${document.getElementById('u2').value.trim()} , ${finalPrompt}`;
         else if(type==='art') finalPrompt = `${document.getElementById('u3').value.trim()} converted into ${finalPrompt}`;
@@ -242,8 +252,11 @@
         const seed = Math.floor(Math.random()*99999999);
         let url = "";
 
-        // بروتوكول NOL المباشر - استخدام بوابة Flux RAW المنفصلة مع تعطيل الكاش والتحسين
-        if(host === 'nol') {
+        // بروتوكول التوليد للمحرك الخامس (GHOST) والمحرك الرابع (NOL)
+        if(host === 'ghost') {
+             // المحرك الخامس يستخدم بروتوكول كسر الفلاتر التلقائي
+             url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&cached=false&safe=false`;
+        } else if(host === 'nol') {
              url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false&cached=false`;
         } else {
              url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
@@ -296,7 +309,7 @@
                 is_smart_injected: data.injected
             }]);
             if(error) throw error;
-            alert("تم الحفظ بنجاح! تم استخدام محرك NOL للتحرر RAW ✅");
+            alert("تم الحفظ بنجاح! تم استخدام بوابة التحرر ✅");
         } catch (err) {
             console.error(err);
             alert("فشل الحفظ!");
@@ -305,7 +318,7 @@
 
     function dl(id) {
         const a = document.createElement('a'); a.href = storedUrls[id].url;
-        a.download = `MERART_NOL_RAW_${Date.now()}.png`; a.click();
+        a.download = `MERART_GHOST_RAW_${Date.now()}.png`; a.click();
     }
 </script>
 </body>
