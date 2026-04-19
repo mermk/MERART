@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART V5.4.0 - نسخة التوجيه الصارم والواقعية</title>
+    <title>MERART V5.5.0 - نسخة ترسانة العمالقة والواقعية</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -32,7 +32,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V5.4.0</h1></div>
+<div class="header"><h1>MERART STUDIO V5.5.0</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -40,7 +40,7 @@
         <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
             <select id="host-select" onchange="updateModels()">
                 <option value="pollinations">Pollinations (Flux Pro & More)</option>
-                <option value="huggingface">Hugging Face (Realistic Legends)</option>
+                <option value="huggingface">Hugging Face (The Giants Era)</option>
                 <option value="prodia">Prodia (Civitai Legends)</option>
             </select>
             <select id="m1"></select>
@@ -147,6 +147,9 @@
             {v: "turbo", n: "Turbo Speed"}
         ],
         huggingface: [
+            {v: "black-forest-labs/FLUX.1-dev", n: "Flux Dev (التحكم المطلق)"},
+            {v: "stablediffusionapi/juggernaut-xl-v9", n: "Juggernaut XL (ملك الواقعية)"},
+            {v: "AlbedoBase/AlbedoBase-XL", n: "AlbedoBase (التوازن الفني)"},
             {v: "SG161222/RealVisXL_V4.0", n: "RealVisXL (الواقعية القصوى)"},
             {v: "dataautics/realistic-vision-v6.0", n: "Realistic Vision (الهوية الحقيقية)"},
             {v: "stabilityai/stable-diffusion-xl-base-1.0", n: "SDXL Base (التدقيق التاريخي)"},
@@ -201,13 +204,11 @@
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
         
-        // جلب رابط صورة ControlNet إذا وجد
         let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
         
         let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
         let smartPrompt = injection.final;
 
-        // دمج صورة الـ Reference بالبرومبت كـ ControlNet
         if(refUrl !== "") {
             smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
         }
@@ -273,7 +274,7 @@
                 is_smart_injected: data.injected
             }]);
             if(error) throw error;
-            alert("تم الحفظ بنجاح! تم استخدام الموديلات الواقعية وصورة التحكم ✅");
+            alert("تم الحفظ بنجاح! تم استخدام ترسانة العمالقة وصورة التحكم ✅");
         } catch (err) {
             console.error(err);
             alert("فشل الحفظ!");
