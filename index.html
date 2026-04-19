@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART V5.3.1 - نسخة الضمان والحقن المرجعي</title>
+    <title>MERART V5.3.2 - نسخة التكامل السحابي</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -31,7 +31,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V5.3.1</h1></div>
+<div class="header"><h1>MERART STUDIO V5.3.2</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -123,7 +123,6 @@
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
     const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
 
-    // مكتبة الأصول المرجعية المحدثة بروابط حمودي الموثقة
     const MERART_ASSETS = {
         "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
         "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
@@ -168,15 +167,15 @@
         });
     }
 
-    // رادار ذكي لتحليل البرومبت وحقن المراجع المناسبة
     function injectReference(prompt) {
         let p = prompt.toLowerCase();
         let ref = "";
-        if (p.includes("najaf") || p.includes("نجف") || p.includes("علي") || p.includes("ali")) ref += MERART_ASSETS["najaf"] + " , ";
-        if (p.includes("karbala") || p.includes("كربلاء") || p.includes("حسين") || p.includes("عباس")) ref += MERART_ASSETS["karbala"] + " , ";
-        if (p.includes("imam") || p.includes("إمام") || p.includes("شخصية")) ref += MERART_ASSETS["imam"] + " , ";
-        if (p.includes("zulfiqar") || p.includes("ذو الفقار") || p.includes("سيف")) ref += MERART_ASSETS["zulfiqar"] + " , ";
-        return ref + prompt;
+        let found = false;
+        if (p.includes("najaf") || p.includes("نجف") || p.includes("ali") || p.includes("علي")) { ref += MERART_ASSETS["najaf"] + " , "; found = true; }
+        if (p.includes("karbala") || p.includes("كربلاء") || p.includes("hussain") || p.includes("حسين") || p.includes("abbas") || p.includes("عباس")) { ref += MERART_ASSETS["karbala"] + " , "; found = true; }
+        if (p.includes("imam") || p.includes("إمام")) { ref += MERART_ASSETS["imam"] + " , "; found = true; }
+        if (p.includes("zulfiqar") || p.includes("ذو الفقار") || p.includes("sword") || p.includes("سيف")) { ref += MERART_ASSETS["zulfiqar"] + " , "; found = true; }
+        return { final: ref + prompt, refs: ref, injected: found };
     }
 
     updateModels();
@@ -198,8 +197,8 @@
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
         
-        // حقن الرابط المرجعي بناءً على محتوى البرومبت
-        let smartPrompt = (id===1) ? injectReference(rawPrompt) : rawPrompt;
+        let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
+        let smartPrompt = injection.final;
 
         let finalPrompt = "";
         if(model.includes('pony')) {
@@ -235,7 +234,15 @@
                 loader.style.display = 'none';
                 img.src = url; img.style.display = 'block';
                 actions.style.display = 'flex';
-                storedUrls[id] = { url, prompt: finalPrompt, model: model, seed: seed, negative: negPrompt };
+                storedUrls[id] = { 
+                    url, 
+                    prompt: finalPrompt, 
+                    model: model, 
+                    seed: seed, 
+                    negative: negPrompt,
+                    refs: injection.refs,
+                    injected: injection.injected
+                };
             }, 400);
         };
     }
@@ -249,13 +256,15 @@
                 content_type: 'Image',
                 model_used: data.model,
                 negative_prompt: data.negative,
-                seed_value: data.seed
+                seed_value: data.seed,
+                reference_urls: data.refs,
+                is_smart_injected: data.injected
             }]);
             if(error) throw error;
-            alert("تمت الأرشفة بنجاح ✅");
+            alert("تمت الأرشفة بنجاح مع بيانات الرادار ✅");
         } catch (err) {
             console.error(err);
-            alert("فشل الحفظ!");
+            alert("فشل الحفظ! تأكد من تحديث الـ SQL أولاً.");
         }
     }
 
