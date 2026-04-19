@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.4.0 - نسخة بوابة الأشباح (التحرر الخام)</title>
+    <title>MERART STUDIO V7.5.0 - نسخة السيادة السحابية (Cloudflare Engine)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -26,24 +26,23 @@
         .percentage { color: white; font-size: 18px; font-family: monospace; }
         .action-btns { display: none; gap: 10px; margin-top: 15px; width: 100%; }
         .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-action:hover { border-color: var(--primary-green); color: var(--primary-green); }
         .ref-box { border: 1px solid #2ecc7133; padding: 10px; border-radius: 10px; margin-bottom: 10px; background: #1a2e2122; }
     </style>
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V7.4.0</h1></div>
+<div class="header"><h1>MERART STUDIO V7.5.0</h1></div>
 
 <div class="container">
     <div class="section-box">
-        <span class="section-title">1. التوليد المباشر (Extreme Realism & Control)</span>
+        <span class="section-title">1. التوليد المباشر (Cloudflare & Multi-Engine Control)</span>
         <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
             <select id="host-select" onchange="updateModels()">
-                <option value="pollinations">Pollinations (Flux Pro & More)</option>
-                <option value="huggingface">Hugging Face (The Giants Era)</option>
-                <option value="prodia">Prodia (Civitai Legends)</option>
-                <option value="nol">NOL (بوابة التحرر المنفصلة - RAW)</option>
-                <option value="ghost">GHOST (بوابة الأشباح - التحرر المطلق)</option>
+                <option value="pollinations">Pollinations (Standard)</option>
+                <option value="huggingface">Hugging Face (The Giants)</option>
+                <option value="prodia">Prodia (Civitai)</option>
+                <option value="nol">NOL (بوابة RAW)</option>
+                <option value="ghost">GHOST (Cloudflare - سيرفرك الخاص)</option>
             </select>
             <select id="m1"></select>
             <select id="s1">
@@ -53,13 +52,13 @@
             </select>
         </div>
         <div class="ref-box">
-            <input type="text" id="ref1" placeholder="أدخل رابط صورة الملامح من بنترست (إختياري - ControlNet)...">
+            <input type="text" id="ref1" placeholder="أدخل رابط صورة الملامح (ControlNet)...">
         </div>
-        <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة... (الرادار المرجعي مفعل)"></textarea>
+        <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة... (عند اختيار GHOST يتم التوليد في سيرفرك الخاص)"></textarea>
         <button class="btn-gen" onclick="fire('text')">استدعاء قوة المحرك ✨</button>
         <div class="viewer-studio">
             <div class="loader-ui" id="load1">
-                <div class="status-txt" id="status1">Processing Deep Details...</div>
+                <div class="status-txt" id="status1">Cloudflare Engine Booting...</div>
                 <div class="percentage" id="perc1">0%</div>
                 <div class="progress-cont"><div class="progress-fill" id="pb1"></div></div>
             </div>
@@ -72,38 +71,12 @@
     </div>
 
     <div class="section-box">
-        <span class="section-title">2. التوليد القائم على صورة (Image to Image)</span>
-        <div class="inputs-row">
-            <input type="text" id="u2" placeholder="رابط الصورة المصدر (Direct URL)...">
-            <select id="m2">
-                <option value="flux">Flux Base</option>
-                <option value="flux-pro">Flux.1 [pro] Precision</option>
-            </select>
-        </div>
-        <textarea id="p2" rows="2" placeholder="أدخل التعديلات المطلوبة..."></textarea>
-        <button class="btn-gen" style="background:#27ae60" onclick="fire('i2i')">معالجة الصورة 🖼️</button>
-        <div class="viewer-studio">
-            <div class="loader-ui" id="load2">
-                <div class="status-txt">Analyzing Source...</div>
-                <div class="percentage" id="perc2">0%</div>
-                <div class="progress-cont"><div class="progress-fill" id="pb2"></div></div>
-            </div>
-            <img class="img-result" id="img2">
-            <div class="action-btns" id="act2">
-                <button class="btn-action" onclick="dl(2)">تنزيل 💾</button>
-                <button class="btn-action" onclick="save(2)">حفظ سحابي 🦉</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="section-box">
-        <span class="section-title">3. تحويل النمط الفني (Image to Art)</span>
+        <span class="section-title">2. تحويل النمط الفني (Image to Art)</span>
         <input type="text" id="u3" placeholder="رابط الصورة المراد تحويلها..." style="margin-bottom:15px;">
         <select id="sty3" style="margin-bottom:15px;">
             <option value="Renaissance oil painting">لوحة زيتية كلاسيكية</option>
             <option value="charcoal sketch">رسم فحم احترافي</option>
             <option value="cyberpunk noir">سايبر بانك نيون</option>
-            <option value="Chinese ink wash">رسم حبر صيني</option>
         </select>
         <button class="btn-gen" style="background:#1e8449" onclick="fire('art')">تطبيق الفن 🎨</button>
         <div class="viewer-studio">
@@ -122,60 +95,25 @@
 </div>
 
 <script>
+    // الإعدادات المركزية
+    const CLOUDFLARE_ENDPOINT = "https://x.nol-30c.workers.dev/";
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
-    
-    const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
-    const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
-    const nolBypassNeg = "blur, fog, plastic, airbrushed, cartoon, lowres, bad anatomy, deformed";
 
-    const MERART_ASSETS = {
-        "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
-        "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
-        "imam": "https://img.wattpad.com/userbg/iooooi17.16430.jpg , https://pbs.twimg.com/profile_images/2013356643971395584/wh7Ip0Xf.jpg",
-        "zulfiqar": "https://i0.wp.com/rajputanaarts.com/wp-content/uploads/2025/10/1000976504-scaled.jpg?fit=700%2C290&ssl=1 , https://mktraders.com.pk/wp-content/uploads/2025/02/mktraders-94.jpg"
+    const hostData = {
+        pollinations: [{v: "flux-pro", n: "Flux Pro"}, {v: "flux-realism", n: "Flux Realism"}],
+        huggingface: [{v: "black-forest-labs/FLUX.1-dev", n: "Flux Dev"}],
+        prodia: [{v: "realistic-vision-v6", n: "Realistic Vision"}],
+        nol: [{v: "flux", n: "Flux RAW"}],
+        ghost: [
+            {v: "@cf/black-forest-labs/flux-1-schnell", n: "Flux 1.0 (أقصى تفاصيل)"},
+            {v: "@cf/stabilityai/stable-diffusion-xl-base-1.0", n: "SDXL (الواقعية الخام)"},
+            {v: "@cf/bytedance/stable-video-diffusion-img2vid-xt", n: "Video Engine (تجريبي)"}
+        ]
     };
 
     let storedUrls = {};
-
-    const hostData = {
-        pollinations: [
-            {v: "flux-pro", n: "Flux.1 [pro] (الرتبة العليا)"},
-            {v: "flux", n: "Flux Professional (Base)"},
-            {v: "flux-realism", n: "Flux Realism (Extreme Skin)"},
-            {v: "pablita", n: "Pablita Art Style"},
-            {v: "flux-anime", n: "Flux Anime Style"},
-            {v: "any-dark", n: "Cinematic Dark"},
-            {v: "turbo", n: "Turbo Speed"}
-        ],
-        huggingface: [
-            {v: "black-forest-labs/FLUX.1-dev", n: "Flux Dev (التحكم المطلق)"},
-            {v: "stablediffusionapi/juggernaut-xl-v9", n: "Juggernaut XL (ملك الواقعية)"},
-            {v: "AlbedoBase/AlbedoBase-XL", n: "AlbedoBase (التوازن الفني)"},
-            {v: "SG161222/RealVisXL_V4.0", n: "RealVisXL (الواقعية القصوى)"},
-            {v: "dataautics/realistic-vision-v6.0", n: "Realistic Vision (الهوية الحقيقية)"},
-            {v: "stabilityai/stable-diffusion-xl-base-1.0", n: "SDXL Base (التدقيق التاريخي)"},
-            {v: "cagliostrolab/animagine-xl-3.1", n: "Illustrious / Animagine XL"},
-            {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Diffusion V6 XL"}
-        ],
-        prodia: [
-            {v: "realistic-vision-v6", n: "Realistic Vision V6 (Civitai)"},
-            {v: "dreamshaper-xl", n: "DreamShaper XL"},
-            {v: "absolute-reality", n: "Absolute Reality"}
-        ],
-        nol: [
-            {v: "flux", n: "Flux RAW (الخام المباشر)"},
-            {v: "stablediffusionapi/epicrealism-xl", n: "Realism Engine V5 (Civitai)"},
-            {v: "stablediffusionapi/juggernaut-aftermath", n: "Juggernaut Aftermath (Raw)"},
-            {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Realism v2 (Uncensored)"}
-        ],
-        ghost: [
-            {v: "flux-realism", n: "GHOST REALISM (بوابة الأشباح)"},
-            {v: "flux", n: "Flux RAW (No Filter)"},
-            {v: "any-dark", n: "Cinematic Dark (Extreme)"}
-        ]
-    };
 
     function updateModels() {
         const host = document.getElementById('host-select').value;
@@ -187,22 +125,10 @@
             modelSelect.appendChild(opt);
         });
     }
-
-    function injectReference(prompt) {
-        let p = prompt.toLowerCase();
-        let ref = "";
-        let found = false;
-        if (p.includes("najaf") || p.includes("نجف") || p.includes("ali") || p.includes("علي")) { ref += MERART_ASSETS["najaf"] + " , "; found = true; }
-        if (p.includes("karbala") || p.includes("كربلاء") || p.includes("hussain") || p.includes("حسين") || p.includes("abbas") || p.includes("عباس")) { ref += MERART_ASSETS["karbala"] + " , "; found = true; }
-        if (p.includes("imam") || p.includes("إمام")) { ref += MERART_ASSETS["imam"] + " , "; found = true; }
-        if (p.includes("zulfiqar") || p.includes("ذو الفقار") || p.includes("sword") || p.includes("سيف")) { ref += MERART_ASSETS["zulfiqar"] + " , "; found = true; }
-        return { final: ref + prompt, refs: ref, injected: found };
-    }
-
     updateModels();
 
     async function fire(type) {
-        let id = (type==='text')?1:(type==='i2i')?2:3;
+        let id = (type==='text')?1:3;
         const loader = document.getElementById(`load${id}`);
         const progressBar = document.getElementById(`pb${id}`);
         const percTxt = document.getElementById(`perc${id}`);
@@ -213,110 +139,71 @@
         loader.style.display = 'block';
         
         let host = document.getElementById('host-select').value;
-        let model = (id===1)?document.getElementById('m1').value:document.getElementById('m2').value;
-        let size = (id===1)?document.getElementById('s1').value:"1024x1024";
-        let [w, h] = size.split('x');
-        let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
-        
-        let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
-        let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
-        let smartPrompt = injection.final;
-
-        if(refUrl !== "") {
-            smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
-        }
-
-        let finalPrompt = "";
-        let activeNeg = negPrompt;
-
-        if(host === 'nol' || host === 'ghost') {
-            finalPrompt = `unfiltered raw photography, hyper-realistic skin texture, visible pores, cinematic natural lighting, masterpiece, 8k, ${smartPrompt}`;
-            activeNeg = nolBypassNeg;
-        } else {
-            finalPrompt = smartPrompt + qualityBoost;
-        }
-
-        if(type==='i2i') finalPrompt = `${document.getElementById('u2').value.trim()} , ${finalPrompt}`;
-        else if(type==='art') finalPrompt = `${document.getElementById('u3').value.trim()} converted into ${finalPrompt}`;
+        let model = document.getElementById('m1').value;
+        let prompt = (id===1)?document.getElementById('p1').value:document.getElementById('sty3').value;
 
         let progress = 0;
         let interval = setInterval(() => {
-            if (progress < 96) {
-                progress += Math.floor(Math.random() * 5) + 1;
+            if (progress < 95) {
+                progress += 3;
                 progressBar.style.width = progress + '%';
                 percTxt.innerText = progress + '%';
             }
         }, 200);
 
-        const seed = Math.floor(Math.random()*99999999);
-        let url = "";
-
-        if(host === 'ghost') {
-             // بروتوكول GHOST الجديد: تحويل المسار وتفعيل وضع الواقعية الفائق
-             url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&cached=false&safe=false&realism=true&refine=true`;
-        } else if(host === 'nol') {
-             url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false&cached=false`;
-        } else {
-             url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
-        }
-        
-        const tempImg = new Image();
-        tempImg.crossOrigin = "anonymous";
-        tempImg.src = url;
-
-        tempImg.onload = () => {
-            clearInterval(interval);
-            progressBar.style.width = '100%';
-            percTxt.innerText = '100%';
-            
-            setTimeout(() => {
+        if (host === 'ghost') {
+            try {
+                // استدعاء مباشر لسيرفر حمودي الخاص بدون أي فلاتر
+                const response = await fetch(CLOUDFLARE_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, model: model })
+                });
+                
+                if (!response.ok) throw new Error("سيرفر Cloudflare غير مستقر حالياً");
+                
+                const blob = await response.blob();
+                const objectURL = URL.createObjectURL(blob);
+                
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                percTxt.innerText = '100%';
                 loader.style.display = 'none';
-                img.src = url; 
+                img.src = objectURL;
                 img.style.display = 'block';
                 actions.style.display = 'flex';
-                storedUrls[id] = { 
-                    url: url, 
-                    prompt: finalPrompt, 
-                    model: model, 
-                    seed: seed, 
-                    negative: activeNeg,
-                    refs: injection.refs + (refUrl ? " | ControlNet: " + refUrl : ""),
-                    injected: (injection.injected || refUrl !== "")
-                };
-            }, 400);
-        };
-
-        tempImg.onerror = () => {
-            clearInterval(interval);
-            alert("فشل المحرك في استلام الطلب! جرب وصفاً أبسط.");
-            loader.style.display = 'none';
-        };
-    }
-
-    async function save(id) {
-        const data = storedUrls[id];
-        try {
-            const { error } = await _supabase.from('merart_logs').insert([{ 
-                prompt: data.prompt, 
-                output_url: data.url, 
-                content_type: 'Image',
-                model_used: data.model,
-                negative_prompt: data.negative,
-                seed_value: data.seed,
-                reference_urls: data.refs,
-                is_smart_injected: data.injected
-            }]);
-            if(error) throw error;
-            alert("تم الحفظ بنجاح! تم استخدام بوابة التحرر ✅");
-        } catch (err) {
-            console.error(err);
-            alert("فشل الحفظ!");
+                storedUrls[id] = { url: objectURL, prompt: prompt, model: model };
+            } catch (err) {
+                alert("خطأ في الاتصال بالسيرفر: " + err.message);
+                loader.style.display = 'none';
+                clearInterval(interval);
+            }
+        } else {
+            // المحركات التقليدية
+            const seed = Math.floor(Math.random()*999999);
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${model}&seed=${seed}&nologo=true`;
+            img.src = url;
+            img.onload = () => {
+                clearInterval(interval);
+                loader.style.display = 'none';
+                img.style.display = 'block';
+                actions.style.display = 'flex';
+                storedUrls[id] = { url: url, prompt: prompt, model: model };
+            };
         }
     }
 
     function dl(id) {
         const a = document.createElement('a'); a.href = storedUrls[id].url;
-        a.download = `MERART_GHOST_RAW_${Date.now()}.png`; a.click();
+        a.download = `MERART_GHOST_${Date.now()}.png`; a.click();
+    }
+
+    async function save(id) {
+        const data = storedUrls[id];
+        const { error } = await _supabase.from('merart_logs').insert([{ 
+            prompt: data.prompt, output_url: data.url, model_used: data.model 
+        }]);
+        if(!error) alert("تم الحفظ في السحابة بنجاح! 🦉");
     }
 </script>
 </body>
