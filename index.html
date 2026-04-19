@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART V5.3 - النسخة الكاملة والمطورة</title>
+    <title>MERART V5.3.1 - نسخة الضمان والحقن المرجعي</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -31,7 +31,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V5.3</h1></div>
+<div class="header"><h1>MERART STUDIO V5.3.1</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -49,7 +49,7 @@
                 <option value="1280x720">Landscape (16:9)</option>
             </select>
         </div>
-        <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة... (نظام التحسين الآلي مفعل)"></textarea>
+        <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة... (الرادار المرجعي مفعل)"></textarea>
         <button class="btn-gen" onclick="fire('text')">استدعاء قوة المحرك ✨</button>
         <div class="viewer-studio">
             <div class="loader-ui" id="load1">
@@ -123,6 +123,14 @@
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
     const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
 
+    // مكتبة الأصول المرجعية المحدثة بروابط حمودي الموثقة
+    const MERART_ASSETS = {
+        "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
+        "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
+        "imam": "https://img.wattpad.com/userbg/iooooi17.16430.jpg , https://pbs.twimg.com/profile_images/2013356643971395584/wh7Ip0Xf.jpg",
+        "zulfiqar": "https://i0.wp.com/rajputanaarts.com/wp-content/uploads/2025/10/1000976504-scaled.jpg?fit=700%2C290&ssl=1 , https://mktraders.com.pk/wp-content/uploads/2025/02/mktraders-94.jpg"
+    };
+
     let storedUrls = {};
 
     const hostData = {
@@ -160,6 +168,17 @@
         });
     }
 
+    // رادار ذكي لتحليل البرومبت وحقن المراجع المناسبة
+    function injectReference(prompt) {
+        let p = prompt.toLowerCase();
+        let ref = "";
+        if (p.includes("najaf") || p.includes("نجف") || p.includes("علي") || p.includes("ali")) ref += MERART_ASSETS["najaf"] + " , ";
+        if (p.includes("karbala") || p.includes("كربلاء") || p.includes("حسين") || p.includes("عباس")) ref += MERART_ASSETS["karbala"] + " , ";
+        if (p.includes("imam") || p.includes("إمام") || p.includes("شخصية")) ref += MERART_ASSETS["imam"] + " , ";
+        if (p.includes("zulfiqar") || p.includes("ذو الفقار") || p.includes("سيف")) ref += MERART_ASSETS["zulfiqar"] + " , ";
+        return ref + prompt;
+    }
+
     updateModels();
 
     async function fire(type) {
@@ -179,13 +198,16 @@
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
         
+        // حقن الرابط المرجعي بناءً على محتوى البرومبت
+        let smartPrompt = (id===1) ? injectReference(rawPrompt) : rawPrompt;
+
         let finalPrompt = "";
         if(model.includes('pony')) {
-            finalPrompt = `score_9, score_8_up, score_7_up, ${rawPrompt} ${qualityBoost}`;
+            finalPrompt = `score_9, score_8_up, score_7_up, ${smartPrompt} ${qualityBoost}`;
         } else if(model.includes('flux')) {
-            finalPrompt = `${rawPrompt} ${qualityBoost} --no ${negPrompt}`;
+            finalPrompt = `${smartPrompt} ${qualityBoost} --no ${negPrompt}`;
         } else {
-            finalPrompt = rawPrompt + qualityBoost;
+            finalPrompt = smartPrompt + qualityBoost;
         }
 
         if(type==='i2i') finalPrompt = `${document.getElementById('u2').value.trim()} , ${finalPrompt}`;
@@ -230,10 +252,10 @@
                 seed_value: data.seed
             }]);
             if(error) throw error;
-            alert("تمت الأرشفة بنجاح مع بيانات المعالجة الكاملة ✅");
+            alert("تمت الأرشفة بنجاح ✅");
         } catch (err) {
             console.error(err);
-            alert("فشل الحفظ، تأكد من تحديث جدول SQL أولاً!");
+            alert("فشل الحفظ!");
         }
     }
 
