@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART V5.3.2 - نسخة التكامل السحابي</title>
+    <title>MERART V5.4.0 - نسخة التوجيه الصارم والواقعية</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -27,19 +27,20 @@
         .action-btns { display: none; gap: 10px; margin-top: 15px; width: 100%; }
         .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-action:hover { border-color: var(--primary-green); color: var(--primary-green); }
+        .ref-box { border: 1px solid #2ecc7133; padding: 10px; border-radius: 10px; margin-bottom: 10px; background: #1a2e2122; }
     </style>
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V5.3.2</h1></div>
+<div class="header"><h1>MERART STUDIO V5.4.0</h1></div>
 
 <div class="container">
     <div class="section-box">
-        <span class="section-title">1. التوليد المباشر (Extreme Realism Hub)</span>
+        <span class="section-title">1. التوليد المباشر (Extreme Realism & Control)</span>
         <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
             <select id="host-select" onchange="updateModels()">
                 <option value="pollinations">Pollinations (Flux Pro & More)</option>
-                <option value="huggingface">Hugging Face (Pony & Illustrious)</option>
+                <option value="huggingface">Hugging Face (Realistic Legends)</option>
                 <option value="prodia">Prodia (Civitai Legends)</option>
             </select>
             <select id="m1"></select>
@@ -48,6 +49,9 @@
                 <option value="720x1280">Portrait (9:16)</option>
                 <option value="1280x720">Landscape (16:9)</option>
             </select>
+        </div>
+        <div class="ref-box">
+            <input type="text" id="ref1" placeholder="أدخل رابط صورة الملامح من بنترست (إختياري - ControlNet)...">
         </div>
         <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة... (الرادار المرجعي مفعل)"></textarea>
         <button class="btn-gen" onclick="fire('text')">استدعاء قوة المحرك ✨</button>
@@ -137,22 +141,22 @@
             {v: "flux-pro", n: "Flux.1 [pro] (الرتبة العليا)"},
             {v: "flux", n: "Flux Professional (Base)"},
             {v: "flux-realism", n: "Flux Realism (Extreme Skin)"},
-            {v: "flux-pro", n: "Kling Deep (Chinese)"},
             {v: "pablita", n: "Pablita Art Style"},
             {v: "flux-anime", n: "Flux Anime Style"},
             {v: "any-dark", n: "Cinematic Dark"},
             {v: "turbo", n: "Turbo Speed"}
         ],
         huggingface: [
+            {v: "SG161222/RealVisXL_V4.0", n: "RealVisXL (الواقعية القصوى)"},
+            {v: "dataautics/realistic-vision-v6.0", n: "Realistic Vision (الهوية الحقيقية)"},
+            {v: "stabilityai/stable-diffusion-xl-base-1.0", n: "SDXL Base (التدقيق التاريخي)"},
             {v: "cagliostrolab/animagine-xl-3.1", n: "Illustrious / Animagine XL"},
-            {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Diffusion V6 XL"},
-            {v: "prompthero/openjourney", n: "OpenJourney (Midjourney)"}
+            {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Diffusion V6 XL"}
         ],
         prodia: [
             {v: "realistic-vision-v6", n: "Realistic Vision V6 (Civitai)"},
             {v: "dreamshaper-xl", n: "DreamShaper XL"},
-            {v: "absolute-reality", n: "Absolute Reality"},
-            {v: "sdxl-1.0", n: "Standard SDXL"}
+            {v: "absolute-reality", n: "Absolute Reality"}
         ]
     };
 
@@ -197,8 +201,16 @@
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
         
+        // جلب رابط صورة ControlNet إذا وجد
+        let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
+        
         let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
         let smartPrompt = injection.final;
+
+        // دمج صورة الـ Reference بالبرومبت كـ ControlNet
+        if(refUrl !== "") {
+            smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
+        }
 
         let finalPrompt = "";
         if(model.includes('pony')) {
@@ -240,8 +252,8 @@
                     model: model, 
                     seed: seed, 
                     negative: negPrompt,
-                    refs: injection.refs,
-                    injected: injection.injected
+                    refs: injection.refs + (refUrl ? " | ControlNet: " + refUrl : ""),
+                    injected: (injection.injected || refUrl !== "")
                 };
             }, 400);
         };
@@ -261,10 +273,10 @@
                 is_smart_injected: data.injected
             }]);
             if(error) throw error;
-            alert("تمت الأرشفة بنجاح مع بيانات الرادار ✅");
+            alert("تم الحفظ بنجاح! تم استخدام الموديلات الواقعية وصورة التحكم ✅");
         } catch (err) {
             console.error(err);
-            alert("فشل الحفظ! تأكد من تحديث الـ SQL أولاً.");
+            alert("فشل الحفظ!");
         }
     }
 
