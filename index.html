@@ -43,7 +43,8 @@
                 <option value="huggingface">Hugging Face (The Giants Era)</option>
                 <option value="prodia">Prodia (Civitai Legends)</option>
                 <option value="nol">NOL (بوابة التحرر المنفصلة - RAW)</option>
-                <option value="ghost">GHOST (Cloudflare - سيرفرك الخاص)</option>
+                <option value="ghost">GHOST (Cloudflare - نيرونات)</option>
+                <option value="hug">HUG (بوابتك العالمية - Cloudflare API)</option>
             </select>
             <select id="m1"></select>
             <select id="s1">
@@ -130,6 +131,8 @@
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
     const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
     const nolBypassNeg = "blur, fog, plastic, airbrushed, cartoon, lowres, bad anatomy, deformed";
+    // هاية الحقنة مالتنا للمحرك السادس - تمنع التشوهات وتضمن النقاء الجسدي
+    const hugPureInject = ", (censorship:1.5), (blur:1.5), (distorted:1.3), deformed, low quality, bad anatomy, (worst quality:1.4), (low resolution:1.4), plastic skin, airbrushed, logo, watermark";
 
     const MERART_ASSETS = {
         "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
@@ -172,11 +175,21 @@
             {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Realism v2 (Uncensored)"}
         ],
         ghost: [
-            {v: "@cf/leonardo/phoenix-1.0", n: "GHOST: Leonardo Phoenix (ملك التفاصيل 🔥)"},
-            {v: "@cf/leonardo/lucid-origin", n: "GHOST: Leonardo Lucid (واقعي جداً)"},
-            {v: "@cf/bytedance/stable-diffusion-xl-lightning", n: "GHOST: XL Lightning (سرعة البرق)"},
-            {v: "@cf/lykon/dreamshaper-8-lcm", n: "GHOST: DreamShaper 8 (لمسة فنية)"},
-            {v: "@cf/stabilityai/stable-diffusion-xl-base-1.0", n: "GHOST: SDXL Pro (كلاسيك)"}
+            {v: "@cf/leonardo/phoenix-1.0", n: "GHOST: Leonardo Phoenix (نيرونات 🔥)"},
+            {v: "@cf/leonardo/lucid-origin", n: "GHOST: Leonardo Lucid"},
+            {v: "@cf/bytedance/stable-diffusion-xl-lightning", n: "GHOST: XL Lightning"},
+            {v: "@cf/lykon/dreamshaper-8-lcm", n: "GHOST: DreamShaper 8"},
+            {v: "@cf/stabilityai/stable-diffusion-xl-base-1.0", n: "GHOST: SDXL Pro"}
+        ],
+        hug: [
+            {v: "black-forest-labs/FLUX.1-dev", n: "HUG: Flux.1 Dev (عالمي 🔥)"},
+            {v: "Lykon/AbsoluteReality", n: "HUG: Absolute Reality (واقعية وتشريح)"},
+            {v: "SG161222/RealVisXL_V4.0", n: "HUG: RealVisXL (واقعية سينمائية📸)"},
+            {v: "stablediffusionapi/realistic-stock-photo", n: "HUG: Photo Real (تفاصيل الجلد)"},
+            {v: "stabilityai/stable-diffusion-3.5-large", n: "HUG: SD 3.5 Large (دقة احترافية)"},
+            {v: "black-forest-labs/FLUX.1-schnell", n: "HUG: Flux Schnell (سرعة البرق ⚡)"},
+            {v: "cagliostrolab/animagine-xl-3.1", n: "HUG: Animagine XL (دقة جسدية صافية)"},
+            {v: "darkstorm2150/Protogen_v2.2", n: "HUG: Protogen (تشريح دقيق جداً)"}
         ]
     };
 
@@ -232,7 +245,12 @@
         let finalPrompt = "";
         let activeNeg = negPrompt;
 
-        if(host === 'nol' || host === 'ghost') {
+        // إعدادات البوابة السادسة (HUG) والپنرونات (GHOST)
+        if(host === 'hug') {
+            // هنا الحقن البرمجي للـ Negative المحسن للـ HUG
+            finalPrompt = `extremely detailed raw photography, photorealistic, 8k, highest quality, ${smartPrompt} --neg ${hugPureInject}`;
+            activeNeg = hugPureInject;
+        } else if(host === 'nol' || host === 'ghost') {
             finalPrompt = `unfiltered raw photography, hyper-realistic skin texture, visible pores, cinematic natural lighting, masterpiece, 8k, ${smartPrompt}`;
             activeNeg = nolBypassNeg;
         } else {
@@ -251,7 +269,7 @@
             }
         }, 200);
 
-        if (host === 'ghost') {
+        if (host === 'ghost' || host === 'hug') {
             try {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
                     method: 'POST',
@@ -277,7 +295,7 @@
                 }, 400);
             } catch (err) {
                 clearInterval(interval);
-                alert("خطأ في السيرفر السحابي: " + err.message);
+                alert("خطأ في البوابة السحابية: " + err.message);
                 loader.style.display = 'none';
             }
         } else {
@@ -317,7 +335,7 @@
 
     function dl(id) {
         const a = document.createElement('a'); a.href = storedUrls[id].url;
-        a.download = `MERART_GHOST_RAW_${Date.now()}.png`; a.click();
+        a.download = `MERART_STUDIO_${Date.now()}.png`; a.click();
     }
 </script>
 </body>
