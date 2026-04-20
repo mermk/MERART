@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.5.5 - نسخة السيادة السحابية</title>
+    <title>MERART STUDIO V7.6.0 - نسخة السيادة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -32,7 +32,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V7.5.1</h1></div>
+<div class="header"><h1>MERART STUDIO V7.6.0</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -44,8 +44,8 @@
                 <option value="prodia">Prodia (Civitai Legends)</option>
                 <option value="nol">NOL (بوابة التحرر المنفصلة - RAW)</option>
                 <option value="ghost">GHOST (Cloudflare - نيرونات)</option>
-                <option value="tensor">TensorArt (High-Res & LoRA)</option>
-                <option value="horde">Stable Horde (Unfiltered/NSFW)</option>
+                <option value="pollinations_raw">6. Pollinations (NSFW / Unfiltered)</option>
+                <option value="nol_ultra">7. NOL Ultra (Extreme RAW Bypass)</option>
             </select>
             <select id="m1"></select>
             <select id="s1">
@@ -129,14 +129,10 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
-    // المفاتيح الجديدة
-    const TENSOR_KEY = "85c034e4-6207-4ac3-90c8-90536398c867";
-    const HORDE_KEY = "DK_heW-uiJNxSiohRa6VQA";
-
+    // إبقاء الثوابت والبرومبتات كما هي
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
     const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
-    const nolBypassNeg = "blur, fog, plastic, airbrushed, cartoon, lowres, bad anatomy, deformed";
-
+    
     const MERART_ASSETS = {
         "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
         "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
@@ -184,15 +180,15 @@
             {v: "@cf/lykon/dreamshaper-8-lcm", n: "GHOST: DreamShaper 8"},
             {v: "@cf/stabilityai/stable-diffusion-xl-base-1.0", n: "GHOST: SDXL Pro"}
         ],
-        tensor: [
-            {v: "622176842711664157", n: "Tensor: Juggernaut XL (واقعية)"},
-            {v: "604597402636814981", n: "Tensor: RealVisXL (فوتوغراف)"},
-            {v: "614216709549306000", n: "Tensor: Pony Diffusion (NSFW)"}
+        // زراعة المحركات الجديدة
+        pollinations_raw: [
+            {v: "flux-realism", n: "RAW: Flux Skin Realism"},
+            {v: "flux", n: "RAW: Flux Unfiltered"},
+            {v: "any-dark", n: "RAW: Dark Cinematic"}
         ],
-        horde: [
-            {v: "Pony Diffusion V6 XL", n: "Horde: Pony V6 (حرية مطلقة)"},
-            {v: "SDXL_1.0", n: "Horde: Stable Diffusion XL"},
-            {v: "Realistic Vision", n: "Horde: Realistic Vision"}
+        nol_ultra: [
+            {v: "flux", n: "ULTRA: Flux RAW Bypass"},
+            {v: "astraliteheart/pony-diffusion-v6-xl", n: "ULTRA: Pony Realism Uncensored"}
         ]
     };
 
@@ -246,6 +242,9 @@
             smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
         }
 
+        // كود كسر الحماية الخاص بالمحركات الجديدة
+        const bypassCode = ", (unfiltered:1.5), raw photo, photorealistic, ultra detailed, (no blur:1.4), cinematic, clear textures";
+
         let progress = 0;
         let interval = setInterval(() => {
             if (progress < 96) {
@@ -257,57 +256,16 @@
 
         try {
             let finalUrl = "";
-            if (host === 'horde') {
-                statusTxt.innerText = "Queueing on Stable Horde...";
-                const response = await fetch("https://stablehorde.net/api/v2/generate/async", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "apikey": HORDE_KEY },
-                    body: JSON.stringify({
-                        prompt: smartPrompt + " ### nsfw, blur, fog, low quality",
-                        params: { cfg_scale: 7.5, width: parseInt(w), height: parseInt(h), steps: 25 },
-                        models: [model]
-                    })
-                });
-                const data = await response.json();
-                const jobId = data.id;
-                
-                let done = false;
-                while(!done) {
-                    await new Promise(r => setTimeout(r, 4000));
-                    const check = await fetch(`https://stablehorde.net/api/v2/generate/check/${jobId}`);
-                    const status = await check.json();
-                    if(status.done) done = true;
-                    statusTxt.innerText = `Horde Status: ${status.wait_time > 0 ? 'Waiting...' : 'Generating...'}`;
-                }
-                const final = await fetch(`https://stablehorde.net/api/v2/generate/status/${jobId}`);
-                const finalData = await final.json();
-                finalUrl = finalData.generations[0].img;
+            const seed = Math.floor(Math.random()*99999999);
+
+            // المنطق الجديد للمحركات 6 و 7
+            if (host === 'pollinations_raw') {
+                statusTxt.innerText = "Injecting RAW Bypass...";
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false`;
             } 
-            else if (host === 'tensor') {
-                statusTxt.innerText = "TensorArt Engine Processing...";
-                const response = await fetch("https://api.tensor.art/v1/jobs", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${TENSOR_KEY}` },
-                    body: JSON.stringify({
-                        request_id: btoa(Math.random()),
-                        stages: [{ type: "INPUT_DATA", input_data: { model_id: model, prompt: smartPrompt, width: parseInt(w), height: parseInt(h) }}]
-                    })
-                });
-                const data = await response.json();
-                const jobId = data.job.id;
-                
-                let done = false;
-                while(!done) {
-                    await new Promise(r => setTimeout(r, 3000));
-                    const check = await fetch(`https://api.tensor.art/v1/jobs/${jobId}`, {
-                        headers: { "Authorization": `Bearer ${TENSOR_KEY}` }
-                    });
-                    const status = await check.json();
-                    if(status.job.status === "SUCCESS") {
-                        finalUrl = status.job.success_images[0].url;
-                        done = true;
-                    } else if (status.job.status === "FAILED") throw new Error("TensorArt Failed");
-                }
+            else if (host === 'nol_ultra') {
+                statusTxt.innerText = "Bypassing NOL Filters...";
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", masterpiece" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false`;
             }
             else if (host === 'ghost') {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
@@ -319,20 +277,19 @@
                 finalUrl = URL.createObjectURL(imageBlob);
             }
             else {
-                // Pollinations & NOL
-                const seed = Math.floor(Math.random()*99999999);
+                // المحركات 1-4 الأصلية كما كانت بالضبط
                 finalUrl = (host === 'nol') ? 
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false` :
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
-                
-                await new Promise((resolve, reject) => {
-                    const temp = new Image();
-                    temp.crossOrigin = "anonymous";
-                    temp.src = finalUrl;
-                    temp.onload = resolve;
-                    temp.onerror = reject;
-                });
             }
+
+            await new Promise((resolve, reject) => {
+                const temp = new Image();
+                temp.crossOrigin = "anonymous";
+                temp.src = finalUrl;
+                temp.onload = resolve;
+                temp.onerror = reject;
+            });
 
             clearInterval(interval);
             progressBar.style.width = '100%';
@@ -341,11 +298,11 @@
             img.src = finalUrl;
             img.style.display = 'block';
             actions.style.display = 'flex';
-            storedUrls[id] = { url: finalUrl, prompt: smartPrompt, model: model };
+            storedUrls[id] = { url: finalUrl, prompt: smartPrompt, model: host + ":" + model };
 
         } catch (err) {
             clearInterval(interval);
-            alert("فشل في المحرك المختار: " + err.message);
+            alert("فشل في المحرك: " + err.message);
             loader.style.display = 'none';
         }
     }
