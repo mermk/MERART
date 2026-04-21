@@ -237,7 +237,7 @@
 </nav>
 
 <div class="header">
-    <h1>MERART VIDEO V1.0</h1>
+    <h1>MERART VIDEO V1.5</h1>
 </div>
 
 <div class="container">
@@ -257,7 +257,7 @@
         
         <div class="viewer-studio">
             <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">جاري توليد المشهد.. انتظر قليلاً</div>
+                <div class="status-txt" id="status4">جاري توليد المشهد.. قد يستغرق دقيقة</div>
                 <div class="percentage" id="perc4">0%</div>
                 <div class="progress-cont">
                     <div class="progress-fill" id="pb4"></div>
@@ -275,7 +275,6 @@
 </div>
 
 <script>
-    // بيانات السوبابيس المعتمدة
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -309,19 +308,23 @@
         percTxt.innerText = '0%';
 
         const seed = Math.floor(Math.random() * 999999999);
-        const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video`;
+        // تحديث الرابط لضمان عدم وجود كاش قديم وتعطيل اللوجو
+        const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video&nologo=true`;
 
         let interval = setInterval(() => {
-            if (progress < 95) {
-                progress += 1;
-                progressBar.style.width = progress + '%';
-                percTxt.innerText = progress + '%';
+            if (progress < 98) {
+                progress += (progress > 80 ? 0.5 : 1);
+                progressBar.style.width = Math.floor(progress) + '%';
+                percTxt.innerText = Math.floor(progress) + '%';
             }
-        }, 800);
+        }, 1000);
 
+        // تحميل الفيديو
         vid.src = videoUrl;
+        vid.load();
 
-        vid.oncanplay = () => {
+        // بدلاً من انتظار canplay، ننتظر أول ما يوصل "بيانات" (loadeddata)
+        vid.onloadeddata = () => {
             clearInterval(interval);
             progressBar.style.width = '100%';
             percTxt.innerText = '100%';
@@ -332,7 +335,6 @@
                 actions.style.display = 'flex';
                 btn.disabled = false;
                 
-                // خزن البيانات محلياً حتى نرفعها للـ SQL
                 currentVideoData = { 
                     prompt: prompt,
                     output_url: videoUrl,
@@ -343,11 +345,18 @@
             }, 500);
         };
 
-        vid.onerror = () => {
-            clearInterval(interval);
-            alert("المحرك مشغول، حاول مرة ثانية يا بطل.");
-            loader.style.display = 'none';
-            btn.disabled = false;
+        // معالجة الخطأ بطريقة أذكى
+        vid.onerror = (e) => {
+            console.error("Video Error:", e);
+            // أحياناً المتصفح ينطي خطأ بس الفيديو يشتغل إذا سوينا ريفريش للرابط
+            setTimeout(() => {
+                if(vid.networkState === 3) { // إذا فعلاً فشل
+                    clearInterval(interval);
+                    alert("المحرك عليه ضغط حالياً. جرب تضغط 'إطلاق' مرة ثانية أو انتظر ثواني.");
+                    loader.style.display = 'none';
+                    btn.disabled = false;
+                }
+            }, 5000);
         };
     }
 
@@ -363,7 +372,6 @@
         saveBtn.innerText = "جاري الحفظ... ⏳";
 
         try {
-            // تنفيذ الإضافة لجدول merart_logs حسب هيكل الـ SQL الخاص بك
             const { data, error } = await _supabase
                 .from('merart_logs')
                 .insert([
@@ -382,7 +390,7 @@
             saveBtn.innerText = "تم الحفظ بنجاح 🦉";
         } catch (err) { 
             console.error(err);
-            alert("فشل الحفظ: " + (err.message || "تأكد من تسجيل الدخول أو إعدادات الـ RLS")); 
+            alert("فشل الحفظ: تأكد من تسجيل دخولك."); 
             saveBtn.disabled = false;
             saveBtn.innerText = "حفظ بالخزنة 🦉";
         }
