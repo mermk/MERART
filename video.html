@@ -3,177 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO - محرك الفيديو البديل V7.0</title>
+    <title>MERART STUDIO V9.0 - محرك TENSOR الفتاك</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { 
-            --primary-purple: #8e44ad; 
-            --dark-bg: #050505; 
-            --card-bg: #111; 
-            --text: #e0e0e0; 
-        }
-        
-        body { 
-            background: var(--dark-bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            margin: 0; padding: 20px; 
-            display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; 
-        }
-
-        .back-nav { position: absolute; top: 20px; right: 20px; }
-        .btn-back {
-            background: rgba(142, 68, 173, 0.1);
-            border: 1px solid var(--primary-purple);
-            color: white; padding: 10px 20px; border-radius: 50px;
-            text-decoration: none; font-size: 14px; font-weight: bold;
-            transition: 0.3s; display: flex; align-items: center; gap: 8px;
-        }
-
-        .header { 
-            text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-purple); 
-            width: 100%; max-width: 900px; padding: 10px; 
-        }
-        .header h1 { 
-            color: var(--primary-purple); letter-spacing: 5px; margin: 0; 
-            font-size: 2em; text-transform: uppercase; text-shadow: 0 0 15px var(--primary-purple);
-        }
-
-        .section-box { 
-            background: var(--card-bg); padding: 25px; border-radius: 20px; 
-            border: 1px solid #222; width: 100%; max-width: 850px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.7); border-left: 5px solid var(--primary-purple);
-        }
-
-        .inputs-row { display: grid; grid-template-columns: 3fr 1fr; gap: 15px; margin-bottom: 15px; }
-
-        input, select { 
-            width: 100%; padding: 14px; background: #000; border: 1px solid #333; 
-            color: white; border-radius: 12px; font-size: 14px; outline: none;
-        }
-
-        .btn-gen { 
-            width: 100%; padding: 16px; background: var(--primary-purple); border: none; 
-            border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; color: white; 
-            transition: 0.3s; text-transform: uppercase;
-        }
-
-        .viewer-studio { 
-            min-height: 350px; background: #000; border-radius: 15px; 
-            border: 1px dashed #333; margin-top: 20px; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; padding: 15px;
-        }
-
-        video { max-width: 100%; border-radius: 10px; display: none; box-shadow: 0 0 30px #000; }
-
+        :root { --primary-gold: #f1c40f; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
+        body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-gold); width: 100%; max-width: 900px; padding: 10px; }
+        .header h1 { color: var(--primary-gold); letter-spacing: 5px; margin: 0; font-size: 2em; text-transform: uppercase; text-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
+        .container { width: 100%; max-width: 850px; }
+        .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); border-right: 5px solid var(--primary-gold); }
+        .inputs-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; }
+        input, select, textarea { width: 100%; padding: 14px; background: #000; border: 1px solid #333; color: white; border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: var(--primary-gold); }
+        .btn-gen { width: 100%; padding: 16px; background: var(--primary-gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; color: black; margin-bottom: 15px; transition: 0.3s; text-transform: uppercase; }
+        .btn-gen:hover { box-shadow: 0 0 20px var(--primary-gold); transform: translateY(-2px); }
+        .viewer-studio { min-height: 400px; background: #000; border-radius: 15px; border: 1px dashed #444; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; position: relative; }
+        img { max-width: 100%; border-radius: 10px; display: none; box-shadow: 0 0 40px rgba(0,0,0,1); }
         .loader-ui { display: none; width: 100%; text-align: center; }
-        .progress-cont { width: 80%; height: 8px; background: #1a1a1a; border-radius: 10px; margin: 15px auto; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: var(--primary-purple); transition: 0.3s; }
-        .status-txt { color: var(--primary-purple); font-size: 14px; font-weight: bold; }
-
-        .action-btns { display: none; gap: 10px; margin-top: 20px; width: 100%; }
-        .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .progress-cont { width: 85%; height: 6px; background: #1a1a1a; border-radius: 10px; margin: 20px auto; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: var(--primary-gold); box-shadow: 0 0 15px var(--primary-gold); transition: 0.4s; }
+        .status-txt { color: var(--primary-gold); font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+        .percentage { font-size: 24px; font-weight: bold; color: white; margin-top: 10px; }
+        .action-btns { display: none; gap: 10px; margin-top: 25px; width: 100%; }
+        .btn-action { flex: 1; padding: 14px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-action:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
     </style>
 </head>
 <body>
 
-<nav class="back-nav"><a href="index.html" class="btn-back"><span>العودة للملف</span></a></nav>
+<div class="header"><h1>MERART TENSOR STUDIO V9</h1></div>
 
-<div class="header"><h1>MERART STUDIO V7.0</h1></div>
-
-<div class="section-box">
-    <div class="inputs-row">
-        <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
-        <select id="engine4">
-            <option value="svd">SVD Engine (Real MP4)</option>
-            <option value="zeroscope">Zeroscope (Fast)</option>
-        </select>
-    </div>
-    
-    <button class="btn-gen" id="fireBtn" onclick="fireNewEngine()">إطلاق التوليد السينمائي ⚡</button>
-    
-    <div class="viewer-studio">
-        <div class="loader-ui" id="load4">
-            <div class="status-txt" id="status4">جاري الاستدعاء من البوابة الجديدة...</div>
-            <div id="perc4">0%</div>
-            <div class="progress-cont"><div class="progress-fill" id="pb4"></div></div>
+<div class="container">
+    <div class="section-box">
+        <div class="inputs-row">
+            <input type="text" id="p_in" placeholder="أدخل وصف الصورة الاحترافي...">
+            <select id="m_in">
+                <option value="622176842711664157">Juggernaut XL (واقعية قصوى)</option>
+                <option value="604597402636814981">RealVisXL (فوتوغراف)</option>
+                <option value="614216709549306000">Pony Diffusion V6</option>
+            </select>
         </div>
-        <video id="vid4" controls autoplay loop playsinline></video>
-        <div class="action-btns" id="act4">
-            <button class="btn-action" onclick="downloadVid()">تنزيل 💾</button>
-            <button class="btn-action" id="saveBtn" onclick="saveToVault()">حفظ 🦉</button>
+        <textarea id="neg_in" rows="1" placeholder="الكلمات المستبعدة (Negative Prompt)...">blur, deformed, low quality, bad anatomy</textarea>
+        <button class="btn-gen" id="fireBtn" onclick="fireTensor()">إطلاق التوليد من TensorArt ⚡</button>
+        
+        <div class="viewer-studio">
+            <div class="loader-ui" id="load_ui">
+                <div class="status-txt" id="status_txt">جاري إرسال الطلب لـ Tensor...</div>
+                <div class="percentage" id="perc_txt">0%</div>
+                <div class="progress-cont"><div class="progress-fill" id="pb_ui"></div></div>
+            </div>
+            <img id="res_img" alt="Tensor Output">
+            <div class="action-btns" id="act_ui">
+                <button class="btn-action" onclick="downloadImg()">تنزيل 💾</button>
+                <button class="btn-action" id="saveBtn" onclick="saveToVault()">خزن في الخزنة 🦉</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    // الإعدادات اللي دزيتها يا بطل
+    const TENSOR_KEY = "85c034e4-6207-4ac3-90c8-90536398c867";
+    const TENSOR_ENDPOINT = "https://ap-east-1.tensorart.cloud"; 
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
-    let currentVidUrl = "";
 
-    async function fireNewEngine() {
-        const prompt = document.getElementById('p4').value;
+    let finalImgUrl = "";
+
+    async function fireTensor() {
+        const prompt = document.getElementById('p_in').value;
+        const neg = document.getElementById('neg_in').value;
+        const model = document.getElementById('m_in').value;
         const btn = document.getElementById('fireBtn');
-        const loader = document.getElementById('load4');
-        const pb = document.getElementById('pb4');
-        const vid = document.getElementById('vid4');
-        const perc = document.getElementById('perc4');
+        const loader = document.getElementById('load_ui');
+        const img = document.getElementById('res_img');
+        const status = document.getElementById('status_txt');
+        const pb = document.getElementById('pb_ui');
+        const perc = document.getElementById('perc_txt');
 
-        if(!prompt) return alert("محمديتي، اكتب وصف!");
+        if(!prompt) return alert("محمديتي، الوصف مفقود!");
 
         btn.disabled = true;
         loader.style.display = 'block';
-        vid.style.display = 'none';
-        document.getElementById('act4').style.display = 'none';
+        img.style.display = 'none';
+        document.getElementById('act_ui').style.display = 'none';
+        pb.style.width = '0%';
+        perc.innerText = '0%';
 
-        let p = 0;
-        let iv = setInterval(() => {
-            if(p < 99) {
-                p += (p > 90 ? 0.1 : 1);
-                pb.style.width = Math.floor(p) + '%';
-                perc.innerText = Math.floor(p) + '%';
+        try {
+            // المرحلة 1: إرسال طلب التوليد (Job Creation)
+            status.innerText = "جاري حجز سيرفر التوليد...";
+            const response = await fetch(`${TENSOR_ENDPOINT}/v1/jobs`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TENSOR_KEY}`
+                },
+                body: JSON.stringify({
+                    request_id: btoa(Math.random().toString()),
+                    stages: [{
+                        type: "INPUT_DATA",
+                        input_data: {
+                            model_id: model,
+                            prompt: prompt,
+                            negative_prompt: neg,
+                            width: 1024,
+                            height: 1024,
+                            sd_model: "SDXL_1.0",
+                            steps: 25,
+                            cfg_scale: 7
+                        }
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            if(!data.job) throw new Error("فشل في استلام رقم الوظيفة");
+            const jobId = data.job.id;
+
+            // المرحلة 2: مراقبة الوظيفة (Polling)
+            let isDone = false;
+            let attempts = 0;
+            status.innerText = "المحرك يعمل هسة.. انتظر ثواني...";
+
+            while(!isDone && attempts < 30) {
+                await new Promise(r => setTimeout(r, 3000)); // انتظر 3 ثواني بكل مرة
+                attempts++;
+                
+                const check = await fetch(`${TENSOR_ENDPOINT}/v1/jobs/${jobId}`, {
+                    headers: { 'Authorization': `Bearer ${TENSOR_KEY}` }
+                });
+                const statusData = await check.json();
+                
+                let p = Math.min(attempts * 10, 95);
+                pb.style.width = p + '%';
+                perc.innerText = p + '%';
+
+                if(statusData.job.status === "SUCCESS") {
+                    finalImgUrl = statusData.job.success_images[0].url;
+                    isDone = true;
+                } else if(statusData.job.status === "FAILED") {
+                    throw new Error("السيرفر رفض الطلب أو الموديل مشغول");
+                }
             }
-        }, 500);
 
-        // استخدام محرك Zeroscope المستقر جداً عبر بوابات HuggingFace المفتوحة
-        // هذا الرابط يرجع ملف فيديو حقيقي وليس صفحة ويب
-        const seed = Math.floor(Math.random() * 99999);
-        const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=video&seed=${seed}`;
+            if(isDone) {
+                pb.style.width = '100%';
+                perc.innerText = '100%';
+                img.src = finalImgUrl;
+                img.onload = () => {
+                    loader.style.display = 'none';
+                    img.style.display = 'block';
+                    document.getElementById('act_ui').style.display = 'flex';
+                    btn.disabled = false;
+                };
+            } else {
+                throw new Error("انتهى وقت الانتظار");
+            }
 
-        vid.src = finalUrl;
-        vid.onloadeddata = () => {
-            clearInterval(iv);
-            pb.style.width = '100%';
-            perc.innerText = '100%';
-            loader.style.display = 'none';
-            vid.style.display = 'block';
-            document.getElementById('act4').style.display = 'flex';
-            btn.disabled = false;
-            currentVidUrl = finalUrl;
-        };
-
-        vid.onerror = () => {
-            clearInterval(iv);
-            alert("المحرك مشغول، راح ننتقل للبوابة الاحتياطية المباشرة!");
-            window.open(finalUrl, '_blank'); // فتح مباشر للفيديو
+        } catch (e) {
+            alert("صارت مشكلة: " + e.message);
             loader.style.display = 'none';
             btn.disabled = false;
-        };
+        }
     }
 
-    function downloadVid() { if(currentVidUrl) window.open(currentVidUrl, '_blank'); }
+    function downloadImg() {
+        if(finalImgUrl) window.open(finalImgUrl, '_blank');
+    }
+
     async function saveToVault() {
         const sBtn = document.getElementById('saveBtn');
         sBtn.disabled = true;
-        await _supabase.from('merart_logs').insert([{ 
-            prompt: document.getElementById('p4').value, 
-            output_url: currentVidUrl, 
-            content_type: 'New_Engine_Video' 
+        const { error } = await _supabase.from('merart_logs').insert([{ 
+            prompt: document.getElementById('p_in').value, 
+            output_url: finalImgUrl, 
+            content_type: 'Tensor_Premium_Image' 
         }]);
-        alert("تم الحفظ بنجاح! ✅");
-        sBtn.innerText = "محفوظ";
+        if(!error) { alert("تم الحفظ في خزنتك بنجاح! ✅"); sBtn.innerText = "محفوظ"; }
     }
 </script>
 </body>
