@@ -42,8 +42,13 @@
         .unlocked #vault-ring { transform: scale(10) rotate(720deg) !important; opacity: 0 !important; filter: blur(20px); pointer-events: none; }
 
         /* ستايلات الستوديو الأصلية */
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; position: relative; }
         .header h1 { color: var(--primary-green); letter-spacing: 10px; margin: 0; font-size: 2.2em; text-transform: uppercase; }
+        
+        /* ستايل زر الانتقال الجديد */
+        .btn-cinema { position: absolute; left: 10px; top: 15px; padding: 8px 15px; background: transparent; border: 1px solid var(--primary-green); color: var(--primary-green); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.3s; text-decoration: none; }
+        .btn-cinema:hover { background: var(--primary-green); color: black; box-shadow: 0 0 15px var(--primary-green); }
+
         .container { width: 100%; max-width: 850px; display: none; opacity: 0; transition: 1s ease-in; } 
         .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         .section-title { color: var(--primary-green); font-weight: bold; margin-bottom: 20px; display: block; border-right: 5px solid var(--primary-green); padding-right: 15px; font-size: 1.1em; }
@@ -72,7 +77,10 @@
     </div>
 </div>
 
-<div class="header"><h1>MERART STUDIO V7.7.1</h1></div>
+<div class="header">
+    <h1>MERART STUDIO V7.7.1</h1>
+    <a href="video.html" class="btn-cinema">السينما 🎬</a>
+</div>
 
 <div class="container" id="main-studio">
     <div class="section-box">
