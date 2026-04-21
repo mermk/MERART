@@ -26,7 +26,6 @@
             overflow-x: hidden; 
         }
 
-        /* ستايل زر الرجوع */
         .back-nav {
             position: absolute;
             top: 20px;
@@ -56,7 +55,6 @@
             transform: translateX(-5px);
         }
 
-        /* ستايل الهيدر */
         .header { 
             text-align: center; 
             margin-bottom: 30px; 
@@ -74,7 +72,6 @@
             text-shadow: 0 0 15px var(--primary-purple);
         }
 
-        /* الحاوية الرئيسية */
         .container { 
             width: 100%; 
             max-width: 850px; 
@@ -126,11 +123,6 @@
             transition: 0.3s;
         }
 
-        select:focus, input:focus { 
-            border-color: var(--primary-purple); 
-            box-shadow: 0 0 10px var(--primary-purple);
-        }
-
         .btn-gen { 
             width: 100%; 
             padding: 16px; 
@@ -151,9 +143,8 @@
             box-shadow: 0 0 20px var(--primary-purple); 
         }
 
-        /* ستوديو العرض */
         .viewer-studio { 
-            min-height: 200px; 
+            min-height: 250px; 
             background: #000; 
             border-radius: 15px; 
             border: 1px dashed #333; 
@@ -163,16 +154,18 @@
             justify-content: center; 
             padding: 15px; 
             position: relative; 
+            overflow: hidden;
         }
 
         video { 
             max-width: 100%; 
+            max-height: 500px;
             border-radius: 10px; 
             display: none; 
             box-shadow: 0 0 30px rgba(0,0,0,1); 
+            outline: none;
         }
 
-        /* واجهة التحميل */
         .loader-ui { 
             display: none; 
             width: 100%; 
@@ -204,13 +197,6 @@
             margin-bottom: 5px; 
         }
 
-        .percentage { 
-            color: white; 
-            font-size: 18px; 
-            font-family: monospace; 
-        }
-
-        /* أزرار الإجراءات */
         .action-btns { 
             display: none; 
             gap: 10px; 
@@ -254,7 +240,7 @@
         <span class="section-title">محرك السينما (AI Video Engine - Zeroscope)</span>
         
         <div class="inputs-row">
-            <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي... (مثلاً: Cinematic desert storm)">
+            <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
             <select id="s4">
                 <option value="576x320">Wide (Cinema)</option>
                 <option value="320x576">Portrait (TikTok)</option>
@@ -262,18 +248,18 @@
             </select>
         </div>
         
-        <button class="btn-gen" onclick="fireVideo()">إطلاق التصوير السينمائي 🎬</button>
+        <button class="btn-gen" id="fireBtn" onclick="fireVideo()">إطلاق التصوير السينمائي 🎬</button>
         
         <div class="viewer-studio">
             <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">Rendering Deep Frames...</div>
+                <div class="status-txt" id="status4">جاري معالجة المشهد... (قد يستغرق دقيقة)</div>
                 <div class="percentage" id="perc4">0%</div>
                 <div class="progress-cont">
                     <div class="progress-fill" id="pb4"></div>
                 </div>
             </div>
 
-            <video id="vid4" controls autoplay loop></video>
+            <video id="vid4" controls autoplay loop playsinline></video>
             
             <div class="action-btns" id="act4">
                 <button class="btn-action" onclick="dlVideo()">تنزيل الفيديو 💾</button>
@@ -296,15 +282,18 @@
         const percTxt = document.getElementById('perc4');
         const vid = document.getElementById('vid4');
         const actions = document.getElementById('act4');
+        const btn = document.getElementById('fireBtn');
         const prompt = document.getElementById('p4').value;
         const size = document.getElementById('s4').value;
         const [w, h] = size.split('x');
 
         if(!prompt) { 
-            alert("اكتب وصف للفيديو يا محمديتي! 🤨"); 
+            alert("محمديتي، اكتب وصف أولاً! 🤨"); 
             return; 
         }
 
+        // تحضير الواجهة
+        btn.disabled = true;
         vid.style.display = 'none';
         actions.style.display = 'none';
         loader.style.display = 'block';
@@ -313,55 +302,62 @@
         progressBar.style.width = '0%';
         percTxt.innerText = '0%';
 
+        // أنيميشن وهمي للتحميل لغاية ما يجهز الفيديو فعلياً
         let interval = setInterval(() => {
-            if (progress < 97) {
-                progress += Math.floor(Math.random() * 2) + 1;
+            if (progress < 90) {
+                progress += Math.floor(Math.random() * 3) + 1;
                 progressBar.style.width = progress + '%';
                 percTxt.innerText = progress + '%';
             }
-        }, 1200);
+        }, 1500);
 
         try {
             const seed = Math.floor(Math.random() * 999999);
-            const videoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video&nologo=true`;
+            // استخدمنا رابط مباشر لـ Pollinations مع موديل الفيديو
+            const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video`;
 
-            const response = await fetch(videoUrl);
-            if (!response.ok) throw new Error("المحرك مشغول حالياً، جرب مرة ثانية.");
+            // محاولة التأكد من أن السيرفر استلم الطلب
+            const checkRes = await fetch(videoUrl);
+            if (!checkRes.ok) throw new Error("السيرفر مشغول، حاول لاحقاً.");
 
-            clearInterval(interval);
-            progressBar.style.width = '100%';
-            percTxt.innerText = '100%';
-            
-            setTimeout(() => {
-                loader.style.display = 'none';
-                vid.src = videoUrl;
-                vid.style.display = 'block';
-                actions.style.display = 'flex';
+            // انتظار تحميل الميتا داتا للفيديو للتأكد أنه جاهز للتشغيل
+            vid.src = videoUrl;
+            vid.load();
+
+            vid.oncanplay = () => {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                percTxt.innerText = '100%';
                 
-                storedUrls[4] = { 
-                    url: videoUrl, 
-                    prompt: prompt, 
-                    model: "Zeroscope:Video_V1" 
-                };
-            }, 800);
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    vid.style.display = 'block';
+                    actions.style.display = 'flex';
+                    btn.disabled = false;
+                    
+                    storedUrls[4] = { 
+                        url: videoUrl, 
+                        prompt: prompt, 
+                        model: "Zeroscope:Video_V1" 
+                    };
+                }, 500);
+            };
+
+            vid.onerror = () => {
+                throw new Error("حدث خطأ أثناء تحميل الفيديو.");
+            };
 
         } catch (err) {
             clearInterval(interval);
-            alert("فشل في المحرك: " + err.message);
+            alert("عذراً حمودي: " + err.message);
             loader.style.display = 'none';
+            btn.disabled = false;
         }
     }
 
     async function dlVideo() {
         const url = storedUrls[4].url;
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = `MERART_VIDEO_${Date.now()}.mp4`;
-        a.click();
-        URL.revokeObjectURL(blobUrl);
+        window.open(url, '_blank'); // فتح الفيديو في نافذة جديدة للتحميل المباشر
     }
 
     async function saveVideo() {
@@ -374,10 +370,9 @@
                 model_used: data.model 
             }]);
             if(error) throw error;
-            alert("تم حفظ المشهد بالخزنة بنجاح! ✅");
+            alert("تم حفظ المشهد بنجاح! ✅");
         } catch (err) { 
-            console.error(err);
-            alert("فشل الحفظ بالخزنة!"); 
+            alert("فشل الحفظ!"); 
         }
     }
 </script>
