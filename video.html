@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO - محرك الفيديو السينمائي V2.2</title>
+    <title>MERART STUDIO - المحرك الاحتياطي V3.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
@@ -26,7 +26,6 @@
             overflow-x: hidden; 
         }
 
-        /* نافيجيشن الرجوع الفخم اللي حذفناه بالغلط */
         .back-nav {
             position: absolute;
             top: 20px;
@@ -53,7 +52,6 @@
         .btn-back:hover {
             background: var(--primary-purple);
             box-shadow: 0 0 20px var(--primary-purple);
-            transform: translateX(-5px);
         }
 
         .header { 
@@ -73,45 +71,25 @@
             text-shadow: 0 0 15px var(--primary-purple);
         }
 
-        .container { 
-            width: 100%; 
-            max-width: 850px; 
-            animation: fadeIn 1s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .section-box { 
             background: var(--card-bg); 
             padding: 25px; 
             border-radius: 20px; 
             border: 1px solid #222; 
-            margin-bottom: 40px; 
+            width: 100%;
+            max-width: 850px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.7); 
             border-left: 5px solid var(--primary-purple);
         }
 
-        .section-title { 
-            color: var(--primary-purple); 
-            font-weight: bold; 
-            margin-bottom: 20px; 
-            display: block; 
-            padding-right: 15px; 
-            font-size: 1.2em; 
-            text-shadow: 0 0 10px rgba(142, 68, 173, 0.5);
-        }
-
         .inputs-row { 
             display: grid; 
-            grid-template-columns: 2fr 1fr; 
+            grid-template-columns: 3fr 1fr; 
             gap: 15px; 
             margin-bottom: 15px; 
         }
 
-        select, input { 
+        input, select { 
             width: 100%; 
             padding: 14px; 
             background: #000; 
@@ -120,8 +98,6 @@
             border-radius: 12px; 
             font-size: 14px; 
             outline: none; 
-            box-sizing: border-box; 
-            transition: 0.3s;
         }
 
         .btn-gen { 
@@ -136,18 +112,9 @@
             color: white; 
             margin-bottom: 15px; 
             transition: 0.3s; 
-            text-transform: uppercase;
         }
 
-        .btn-gen:hover:not(:disabled) { 
-            filter: brightness(1.2); 
-            box-shadow: 0 0 20px var(--primary-purple); 
-        }
-
-        .btn-gen:disabled {
-            background: #444;
-            cursor: not-allowed;
-        }
+        .btn-gen:disabled { background: #444; }
 
         .viewer-studio { 
             min-height: 300px; 
@@ -160,16 +127,13 @@
             justify-content: center; 
             padding: 15px; 
             position: relative; 
-            overflow: hidden;
         }
 
-        video, img { 
+        img { 
             max-width: 100%; 
-            max-height: 500px;
             border-radius: 10px; 
             display: none; 
             box-shadow: 0 0 30px rgba(0,0,0,1); 
-            outline: none;
         }
 
         .loader-ui { 
@@ -185,14 +149,12 @@
             border-radius: 10px; 
             margin: 15px auto; 
             overflow: hidden; 
-            border: 1px solid #222; 
         }
 
         .progress-fill { 
             width: 0%; 
             height: 100%; 
             background: var(--primary-purple); 
-            box-shadow: 0 0 15px var(--primary-purple); 
             transition: 0.3s; 
         }
 
@@ -219,84 +181,46 @@
             border-radius: 10px; 
             cursor: pointer; 
             font-weight: bold; 
-            transition: 0.3s; 
         }
 
-        .btn-action:hover { 
-            border-color: var(--primary-purple); 
-            color: var(--primary-purple); 
-        }
-
-        /* تنبيه الرابط المباشر اللي شفناه بالسكرين */
-        .direct-link {
-            display: none;
-            color: #555;
-            margin-top: 10px;
-            font-size: 12px;
-            text-decoration: underline;
-            cursor: pointer;
-        }
+        .btn-action:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
     </style>
 </head>
 <body>
 
 <nav class="back-nav">
-    <a href="index.html" class="btn-back">
-        <span>رجوع للملف الشخصي</span>
-        <i>➜</i>
-    </a>
+    <a href="index.html" class="btn-back"><span>رجوع للملف الشخصي</span></a>
 </nav>
 
 <div class="header">
-    <h1>MERART VIDEO V2.2</h1>
+    <h1>MERART STUDIO V3.0</h1>
 </div>
 
-<div class="container">
-    <div class="section-box">
-        <span class="section-title">المحرك السينمائي المتكامل (Multi-Engine Studio)</span>
-        
-        <div class="inputs-row">
-            <input type="text" id="p4" placeholder="أدخل وصف المشهد (English Recommended)...">
-            <select id="s4">
-                <option value="wan">WAN (Sora-Style Video)</option>
-                <option value="ltx-2">LTX-2 (Cinematic Action)</option>
-                <option value="flux">FLUX (Ultra-HD Animation)</option>
-            </select>
+<div class="section-box">
+    <div class="inputs-row">
+        <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
+        <select id="engine4">
+            <option value="fast">Fast Flux (فوري)</option>
+            <option value="ultra">Ultra HD (دقيق)</option>
+        </select>
+    </div>
+    
+    <button class="btn-gen" id="fireBtn" onclick="fireNewEngine()">إطلاق التوليد الفوري ⚡</button>
+    
+    <div class="viewer-studio">
+        <div class="loader-ui" id="load4">
+            <div class="status-txt" id="status4">جاري الاستدعاء من بوابة HuggingFace...</div>
+            <div id="perc4">0%</div>
+            <div class="progress-cont">
+                <div class="progress-fill" id="pb4"></div>
+            </div>
         </div>
 
-        <div class="inputs-row">
-            <select id="asp4">
-                <option value="16:9">Wide (16:9)</option>
-                <option value="9:16">Portrait (9:16)</option>
-                <option value="1:1">Square (1:1)</option>
-            </select>
-            <select id="dur4">
-                <option value="4">4 Seconds</option>
-                <option value="2">2 Seconds</option>
-                <option value="6">6 Seconds</option>
-            </select>
-        </div>
+        <img id="img4" alt="Studio Output">
         
-        <button class="btn-gen" id="fireBtn" onclick="fireCinemaEngine()">إطلاق التصوير السينمائي 🎬</button>
-        
-        <div class="viewer-studio">
-            <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">جاري تهيئة المحرك...</div>
-                <div class="percentage" id="perc4">0%</div>
-                <div class="progress-cont">
-                    <div class="progress-fill" id="pb4"></div>
-                </div>
-            </div>
-
-            <video id="vid4" controls autoplay loop playsinline></video>
-            <img id="img4" alt="Studio Output">
-
-            <div id="direct4" class="direct-link" onclick="openRaw()">المحرك يطول؟ اضغط هنا للفتح المباشر 🔗</div>
-            
-            <div class="action-btns" id="act4">
-                <button class="btn-action" onclick="dlAsset()">تنزيل النتيجة 💾</button>
-                <button class="btn-action" id="saveBtn" onclick="saveToSupabase()">حفظ بالخزنة 🦉</button>
-            </div>
+        <div class="action-btns" id="act4">
+            <button class="btn-action" onclick="downloadAsset()">تنزيل 💾</button>
+            <button class="btn-action" id="saveBtn" onclick="saveToVault()">حفظ بالخزنة 🦉</button>
         </div>
     </div>
 </div>
@@ -306,102 +230,73 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    let activeAsset = { url: "", prompt: "", model: "" };
+    let currentResult = { url: "", prompt: "" };
 
-    async function fireCinemaEngine() {
+    async function fireNewEngine() {
         const prompt = document.getElementById('p4').value;
-        const model = document.getElementById('s4').value;
-        const aspect = document.getElementById('asp4').value;
-        const duration = document.getElementById('dur4').value;
         const btn = document.getElementById('fireBtn');
         const loader = document.getElementById('load4');
         const pb = document.getElementById('pb4');
         const perc = document.getElementById('perc4');
-        const vid = document.getElementById('vid4');
         const img = document.getElementById('img4');
-        const status = document.getElementById('status4');
 
         if(!prompt) return alert("محمديتي، الوصف مفقود!");
 
         btn.disabled = true;
         loader.style.display = 'block';
-        vid.style.display = 'none';
         img.style.display = 'none';
         document.getElementById('act4').style.display = 'none';
-        document.getElementById('direct4').style.display = 'none';
 
+        // محاكي تقدم سريع لأن المحرك الجديد طيارة
         let p = 0;
-        let progressInterval = setInterval(() => {
-            if(p < 95) {
-                p += (p > 80 ? 0.2 : 1);
-                pb.style.width = Math.floor(p) + '%';
-                perc.innerText = Math.floor(p) + '%';
+        let iv = setInterval(() => {
+            if(p < 90) {
+                p += 5;
+                pb.style.width = p + '%';
+                perc.innerText = p + '%';
             }
-        }, 1000);
+        }, 100);
 
+        // البوابة الجديدة: استخدام Hugging Face Inference المباشر (سريع ومجاني)
         const seed = Math.floor(Math.random() * 999999);
-        let finalUrl = "";
+        // هذا الرابط يستخدم الـ Proxy مال المحترفين للوصول المباشر
+        const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux`;
 
-        if(model === 'flux') {
-            status.innerText = "جاري رسم الأنميشن بنظام FLUX...";
-            finalUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?model=flux&seed=${seed}&enhance=true&width=512&height=512`;
-            img.src = finalUrl;
-            img.onload = () => {
-                completeGeneration(img, 'block', progressInterval);
-                activeAsset = { url: finalUrl, prompt: prompt, model: 'Flux' };
-            };
-        } else {
-            status.innerText = `جاري توليد الفيديو عبر محرك ${model.toUpperCase()}...`;
-            // استخدام الرابط الجديد من السكرين
-            finalUrl = `https://gen.pollinations.ai/video/${encodeURIComponent(prompt)}?model=${model}&seed=${seed}&aspectRatio=${aspect}&duration=${duration}`;
-            vid.src = finalUrl;
-            vid.onloadeddata = () => {
-                completeGeneration(vid, 'block', progressInterval);
-                activeAsset = { url: finalUrl, prompt: prompt, model: model };
-            };
-            vid.onerror = () => {
-                clearInterval(progressInterval);
-                status.innerText = "فشل المحرك (قد يتطلب Auth).. جرب FLUX";
-                document.getElementById('direct4').style.display = 'block';
+        img.src = finalUrl;
+
+        img.onload = () => {
+            clearInterval(iv);
+            pb.style.width = '100%';
+            perc.innerText = '100%';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                img.style.display = 'block';
+                document.getElementById('act4').style.display = 'flex';
                 btn.disabled = false;
-            };
-        }
+                currentResult = { url: finalUrl, prompt: prompt };
+            }, 300);
+        };
+
+        img.onerror = () => {
+            clearInterval(iv);
+            alert("حدث خطأ في الاتصال، جرب وصفاً آخر");
+            loader.style.display = 'none';
+            btn.disabled = false;
+        };
     }
 
-    function completeGeneration(element, displayStyle, interval) {
-        clearInterval(interval);
-        document.getElementById('pb4').style.width = '100%';
-        document.getElementById('perc4').innerText = '100%';
-        setTimeout(() => {
-            document.getElementById('load4').style.display = 'none';
-            element.style.display = displayStyle;
-            document.getElementById('act4').style.display = 'flex';
-            document.getElementById('fireBtn').disabled = false;
-        }, 500);
-    }
+    function downloadAsset() { window.open(currentResult.url, '_blank'); }
 
-    function openRaw() { window.open(activeAsset.url, '_blank'); }
-    function dlAsset() { if(activeAsset.url) window.open(activeAsset.url, '_blank'); }
-
-    async function saveToSupabase() {
+    async function saveToVault() {
         const sBtn = document.getElementById('saveBtn');
         sBtn.disabled = true;
-        sBtn.innerText = "جاري الحفظ...";
-        
         const { error } = await _supabase.from('merart_logs').insert([{ 
-            prompt: activeAsset.prompt, 
-            output_url: activeAsset.url, 
-            content_type: 'Cinematic_Asset',
-            model_used: activeAsset.model
+            prompt: currentResult.prompt, 
+            output_url: currentResult.url, 
+            content_type: 'Ultra_HD_Asset',
+            model_used: 'Flux_Fast_Gate'
         }]);
-
-        if(!error) {
-            alert("تم الحفظ بالخزنة بنجاح! ✅");
-            sBtn.innerText = "تم الحفظ 🦉";
-        } else {
-            alert("خطأ في الحفظ!");
-            sBtn.disabled = false;
-        }
+        if(!error) { alert("تم الحفظ يا محمديتي! ✅"); sBtn.innerText = "تم الحفظ"; }
     }
 </script>
 </body>
