@@ -266,11 +266,15 @@
 
             if (host === 'merart_sovereign') {
                 const manualToken = document.getElementById('manual_hf_token').value.trim();
-                if(!manualToken) throw new Error("التوكن فارغ يا 'حمودي'!");
+                if(!manualToken) throw new Error("يا 'حمودي' التوكن فارغ!");
 
-                statusTxt.innerText = "Sovereign Engine: Connecting to HF Direct...";
+                statusTxt.innerText = "Sovereign Engine: Crossing Barriers...";
                 
-                const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+                // استخدام البروكسي المدمج لتجاوز حماية المتصفح (Brave Shields)
+                const proxyUrl = "https://corsproxy.io/?";
+                const targetUrl = `https://api-inference.huggingface.co/models/${model}`;
+
+                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
                     method: 'POST',
                     headers: {
                         "Authorization": `Bearer ${manualToken}`,
@@ -278,18 +282,15 @@
                     },
                     body: JSON.stringify({
                         inputs: smartPrompt + bypassCode,
-                        parameters: { seed: seed, width: parseInt(w), height: parseInt(h) }
+                        parameters: { seed: seed, width: parseInt(w), height: parseInt(h), wait_for_model: true }
                     })
                 });
 
-                if (response.status === 503) throw new Error("الموديل قيد التحميل.. انتظر دقيقة وأعد المحاولة.");
+                if (response.status === 503) throw new Error("الموديل جاي يحمي.. انتظر شوية وجرب مرة ثانية.");
 
                 if (!response.ok) {
                     const errBody = await response.text();
-                    if (errBody.includes("<!DOCTYPE html>")) {
-                        throw new Error("يجب تفعيل إضافة CORS Unblock في المتصفح لاستخدام هذا المحرك.");
-                    }
-                    throw new Error("خطأ في السيرفر: " + errBody);
+                    throw new Error("السيرفر رفض الطلب. تأكد من صحة التوكن.");
                 }
 
                 const blob = await response.blob();
