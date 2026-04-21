@@ -129,7 +129,6 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
-    // إبقاء الثوابت والبرومبتات كما هي
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
     const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
     
@@ -180,7 +179,6 @@
             {v: "@cf/lykon/dreamshaper-8-lcm", n: "GHOST: DreamShaper 8"},
             {v: "@cf/stabilityai/stable-diffusion-xl-base-1.0", n: "GHOST: SDXL Pro"}
         ],
-        // زراعة المحركات الجديدة
         pollinations_raw: [
             {v: "flux-realism", n: "RAW: Flux Skin Realism"},
             {v: "flux", n: "RAW: Flux Unfiltered"},
@@ -242,8 +240,7 @@
             smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
         }
 
-        // كود كسر الحماية الخاص بالمحركات الجديدة
-        const bypassCode = ", (unfiltered:1.5), raw photo, photorealistic, ultra detailed, (no blur:1.4), cinematic, clear textures";
+        const bypassCode = ", (unfiltered:1.6), raw anatomy, no censorship, high-res textures, full detail, hyper-realism, non-blurred, (explicit detail:1.2)";
 
         let progress = 0;
         let interval = setInterval(() => {
@@ -258,14 +255,15 @@
             let finalUrl = "";
             const seed = Math.floor(Math.random()*99999999);
 
-            // المنطق الجديد للمحركات 6 و 7
             if (host === 'pollinations_raw') {
-                statusTxt.innerText = "Injecting RAW Bypass...";
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false`;
+                statusTxt.innerText = "Bypassing Gateway Filters...";
+                // تعديل المعاملات: إضافة &safe=false وتثبيت enhance=false
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&cache=false`;
             } 
             else if (host === 'nol_ultra') {
-                statusTxt.innerText = "Bypassing NOL Filters...";
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", masterpiece" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false`;
+                statusTxt.innerText = "Executing ULTRA RAW Bypass...";
+                // تكتيك المحرك السابع: وصف المناطق بوضوح لمنع التشويه
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered, no blur effects" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false`;
             }
             else if (host === 'ghost') {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
@@ -277,7 +275,6 @@
                 finalUrl = URL.createObjectURL(imageBlob);
             }
             else {
-                // المحركات 1-4 الأصلية كما كانت بالضبط
                 finalUrl = (host === 'nol') ? 
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false` :
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
