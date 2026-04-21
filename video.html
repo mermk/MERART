@@ -225,15 +225,6 @@
             border-color: var(--primary-purple); 
             color: var(--primary-purple); 
         }
-
-        .direct-link {
-            display: none;
-            color: var(--primary-purple);
-            margin-top: 10px;
-            text-decoration: underline;
-            cursor: pointer;
-            font-size: 13px;
-        }
     </style>
 </head>
 <body>
@@ -246,26 +237,26 @@
 </nav>
 
 <div class="header">
-    <h1>MERART VIDEO V1.3</h1>
+    <h1>MERART VIDEO V1.5</h1>
 </div>
 
 <div class="container">
     <div class="section-box">
-        <span class="section-title">محرك السينما الاحترافي (Deep Fetch Mode)</span>
+        <span class="section-title">محرك السينما الجديد (Flux Cinema Engine)</span>
         
         <div class="inputs-row">
-            <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
+            <input type="text" id="p4" placeholder="أدخل وصف المشهد (مثلاً: رائد فضاء في بغداد)...">
             <select id="s4">
-                <option value="video-576x320">Video Mode (Slow/High Quality)</option>
-                <option value="turbo-512x512">Turbo Mode (Fast/Animation)</option>
+                <option value="flux-anim">Flux Animation (سريع جداً)</option>
+                <option value="stable-vid">Stable Video (جودة عالية)</option>
             </select>
         </div>
         
-        <button class="btn-gen" id="fireBtn" onclick="fireVideo()">إطلاق التصوير السينمائي 🎬</button>
+        <button class="btn-gen" id="fireBtn" onclick="fireCinema()">إطلاق التصوير السينمائي 🎬</button>
         
         <div class="viewer-studio">
             <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">جاري تحضير المحرك...</div>
+                <div class="status-txt" id="status4">جاري توليد المشهد...</div>
                 <div class="percentage" id="perc4">0%</div>
                 <div class="progress-cont">
                     <div class="progress-fill" id="pb4"></div>
@@ -273,13 +264,11 @@
             </div>
 
             <video id="vid4" controls autoplay loop playsinline></video>
-            <img id="img4" alt="Output">
-
-            <div id="direct4" class="direct-link" onclick="openDirect()">المحرك يطول؟ اضغط لفتحه بتبويب منفصل 🔗</div>
+            <img id="img4" alt="Studio Output">
             
             <div class="action-btns" id="act4">
-                <button class="btn-action" onclick="dlVideo()">تنزيل 💾</button>
-                <button class="btn-action" id="saveBtn" onclick="saveVideo()">حفظ بالخزنة 🦉</button>
+                <button class="btn-action" onclick="downloadAsset()">تنزيل 💾</button>
+                <button class="btn-action" id="saveBtn" onclick="saveToSupabase()">حفظ بالخزنة 🦉</button>
             </div>
         </div>
     </div>
@@ -290,99 +279,85 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    let currentVideoData = null;
-    let globalUrl = "";
+    let currentAsset = { url: "", prompt: "", type: "" };
 
-    async function fireVideo() {
+    async function fireCinema() {
+        const prompt = document.getElementById('p4').value;
+        const mode = document.getElementById('s4').value;
+        const btn = document.getElementById('fireBtn');
         const loader = document.getElementById('load4');
         const pb = document.getElementById('pb4');
         const perc = document.getElementById('perc4');
-        const btn = document.getElementById('fireBtn');
-        const status = document.getElementById('status4');
-        const prompt = document.getElementById('p4').value;
-        const config = document.getElementById('s4').value.split('-');
-        
-        if(!prompt) return alert("اكتب الوصف يا بطل!");
-
-        btn.disabled = true;
-        loader.style.display = 'block';
-        document.getElementById('vid4').style.display = 'none';
-        document.getElementById('img4').style.display = 'none';
-        document.getElementById('act4').style.display = 'none';
-        document.getElementById('direct4').style.display = 'none';
-        
-        const seed = Math.floor(Math.random() * 999999);
-        const mode = config[0];
-        const [w, h] = config[1].split('x');
-        globalUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=${mode === 'video' ? 'video' : 'turbo'}&nologo=true`;
-
-        // تكتيك الـ Progress
-        let p = 0;
-        let iv = setInterval(() => {
-            if(p < 90) {
-                p += (p > 70 ? 0.2 : 1);
-                pb.style.width = Math.floor(p) + '%';
-                perc.innerText = Math.floor(p) + '%';
-            }
-        }, 1000);
-
-        status.innerText = "جاري الاتصال بالسيرفر...";
-
-        try {
-            // Fetch للتأكد من الرابط شغال قبل تحميله بالمشغل
-            const resp = await fetch(globalUrl);
-            if(resp.ok) {
-                status.innerText = "وصلت البيانات! جاري العرض...";
-                finalize(mode, globalUrl, seed, iv);
-            } else {
-                throw new Error("Busy");
-            }
-        } catch (e) {
-            clearInterval(iv);
-            status.innerText = "المحرك مشغول.. جرب الرابط المباشر";
-            document.getElementById('direct4').style.display = 'block';
-            btn.disabled = false;
-        }
-    }
-
-    function finalize(mode, url, seed, iv) {
-        clearInterval(iv);
-        document.getElementById('pb4').style.width = '100%';
-        document.getElementById('perc4').innerText = '100%';
-        
         const vid = document.getElementById('vid4');
         const img = document.getElementById('img4');
 
-        if(mode === 'video') {
-            vid.src = url;
-            vid.style.display = 'block';
-        } else {
-            img.src = url;
-            img.style.display = 'block';
-        }
+        if(!prompt) return alert("محمديتي، الوصف وين؟");
 
-        setTimeout(() => {
-            document.getElementById('load4').style.display = 'none';
-            document.getElementById('act4').style.display = 'flex';
-            document.getElementById('fireBtn').disabled = false;
-            currentVideoData = { prompt: document.getElementById('p4').value, output_url: url, content_type: mode, seed_value: seed };
-        }, 500);
+        btn.disabled = true;
+        loader.style.display = 'block';
+        vid.style.display = 'none';
+        img.style.display = 'none';
+        document.getElementById('act4').style.display = 'none';
+
+        let p = 0;
+        let interval = setInterval(() => {
+            if(p < 95) {
+                p += 1;
+                pb.style.width = p + '%';
+                perc.innerText = p + '%';
+            }
+        }, 300);
+
+        const seed = Math.floor(Math.random() * 1000000);
+        // استخدام محرك Flux Animation الجديد (أكثر استقراراً)
+        const finalUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}&model=flux&enhance=true`;
+
+        // بما إنَّ الصور المتحركة أضمن حالياً، راح نستخدم الـ Image Load
+        img.src = finalUrl;
+        img.onload = () => {
+            clearInterval(interval);
+            pb.style.width = '100%';
+            perc.innerText = '100%';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                img.style.display = 'block';
+                document.getElementById('act4').style.display = 'flex';
+                btn.disabled = false;
+                currentAsset = { url: finalUrl, prompt: prompt, type: 'Animation' };
+            }, 500);
+        };
+
+        img.onerror = () => {
+            clearInterval(interval);
+            alert("المحرك متوقف للصيانة، جرب وصفاً آخر");
+            btn.disabled = false;
+            loader.style.display = 'none';
+        };
     }
 
-    function openDirect() { window.open(globalUrl, '_blank'); }
+    function downloadAsset() {
+        if(currentAsset.url) window.open(currentAsset.url, '_blank');
+    }
 
-    async function dlVideo() { if(currentVideoData) window.open(currentVideoData.output_url, '_blank'); }
-
-    async function saveVideo() {
+    async function saveToSupabase() {
         const sBtn = document.getElementById('saveBtn');
         sBtn.disabled = true;
+        sBtn.innerText = "جاري الحفظ... ⏳";
+
         const { error } = await _supabase.from('merart_logs').insert([{ 
-            prompt: currentVideoData.prompt, 
-            output_url: currentVideoData.output_url, 
-            content_type: currentVideoData.content_type, 
-            model_used: 'DeepFetch_V1' 
+            prompt: currentAsset.prompt, 
+            output_url: currentAsset.url, 
+            content_type: currentAsset.type,
+            model_used: 'Flux_Cinema_V1'
         }]);
-        if(!error) { alert("تم الحفظ! ✅"); sBtn.innerText = "تم الحفظ"; }
+
+        if(!error) {
+            alert("تم الحفظ بنجاح يا محمديتي! ✅");
+            sBtn.innerText = "تم الحفظ 🦉";
+        } else {
+            alert("فشل الحفظ، تأكد من الاتصال");
+            sBtn.disabled = false;
+        }
     }
 </script>
 </body>
