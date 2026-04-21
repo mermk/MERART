@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.7.0 - نسخة السيادة</title>
+    <title>MERART STUDIO V7.8.0 - نسخة السيادة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -34,7 +34,7 @@
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V7.7.0</h1></div>
+<div class="header"><h1>MERART STUDIO V7.8.0</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -43,7 +43,7 @@
             <select id="host-select" onchange="updateModels()">
                 <option value="pollinations">Pollinations (Flux Pro & More)</option>
                 <option value="huggingface">Hugging Face (The Giants Era)</option>
-                <option value="prodia">Prodia (Civitai Legends)</option>
+                <option value="prodia">Pollinations Prodia (Civitai Legends)</option>
                 <option value="nol">NOL (بوابة التحرر المنفصلة - RAW)</option>
                 <option value="ghost">GHOST (Cloudflare - نيرونات)</option>
                 <option value="pollinations_raw">6. Pollinations (NSFW / Unfiltered)</option>
@@ -270,8 +270,11 @@
 
                 statusTxt.innerText = "Sovereign Engine: Crossing CORS Bridge...";
                 
-                // هنا التعديل الجذري لحل الـ Failed to fetch باستخدام fetch مباشر مع ضبط Headers
-                const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+                // استخدام جسر CORS لتجاوز الحظر
+                const proxyUrl = "https://corsproxy.io/?";
+                const targetUrl = `https://api-inference.huggingface.co/models/${model}`;
+                
+                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
                     method: 'POST',
                     headers: {
                         "Authorization": `Bearer ${manualToken}`,
@@ -283,8 +286,10 @@
                     })
                 });
 
-                if (response.status === 503) throw new Error("الموديل يفتح عيونه.. انتظر ثواني.");
-                if (!response.ok) throw new Error("السيرفر رفض الدخول (تأكد من التوكن).");
+                if (!response.ok) {
+                    const errData = await response.text();
+                    throw new Error("سيرفر HF رفض الطلب: " + errData);
+                }
 
                 const blob = await response.blob();
                 finalUrl = URL.createObjectURL(blob);
@@ -326,7 +331,7 @@
 
         } catch (err) {
             clearInterval(interval);
-            alert("حدث خطأ: " + err.message);
+            alert("يا حمودي صار خلل: " + err.message);
             loader.style.display = 'none';
         }
     }
