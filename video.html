@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO - محرك الفيديو السينمائي</title>
+    <title>MERART STUDIO - محرك الفيديو السينمائي الجديد</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
@@ -110,7 +110,7 @@
             margin-bottom: 15px; 
         }
 
-        select, input, textarea { 
+        select, input { 
             width: 100%; 
             padding: 14px; 
             background: #000; 
@@ -149,7 +149,7 @@
         }
 
         .viewer-studio { 
-            min-height: 250px; 
+            min-height: 300px; 
             background: #000; 
             border-radius: 15px; 
             border: 1px dashed #333; 
@@ -162,7 +162,7 @@
             overflow: hidden;
         }
 
-        video, img { 
+        video { 
             max-width: 100%; 
             max-height: 500px;
             border-radius: 10px; 
@@ -237,26 +237,40 @@
 </nav>
 
 <div class="header">
-    <h1>MERART VIDEO V1.5</h1>
+    <h1>MERART VIDEO V2.0</h1>
 </div>
 
 <div class="container">
     <div class="section-box">
-        <span class="section-title">محرك السينما الجديد (Flux Cinema Engine)</span>
+        <span class="section-title">محرك الفيديو الحديث (WAN / LTX Engine)</span>
         
         <div class="inputs-row">
-            <input type="text" id="p4" placeholder="أدخل وصف المشهد (مثلاً: رائد فضاء في بغداد)...">
+            <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
             <select id="s4">
-                <option value="flux-anim">Flux Animation (سريع جداً)</option>
-                <option value="stable-vid">Stable Video (جودة عالية)</option>
+                <option value="wan">WAN (High Quality)</option>
+                <option value="ltx-2">LTX-2 (Cinematic)</option>
+                <option value="p-video">P-Video (Standard)</option>
             </select>
         </div>
         
-        <button class="btn-gen" id="fireBtn" onclick="fireCinema()">إطلاق التصوير السينمائي 🎬</button>
+        <div class="inputs-row">
+            <select id="asp4">
+                <option value="16:9">Wide (16:9)</option>
+                <option value="9:16">Portrait (9:16)</option>
+                <option value="1:1">Square (1:1)</option>
+            </select>
+            <select id="dur4">
+                <option value="2">2 Seconds</option>
+                <option value="4">4 Seconds</option>
+                <option value="6">6 Seconds</option>
+            </select>
+        </div>
+        
+        <button class="btn-gen" id="fireBtn" onclick="fireCinemaV2()">إطلاق التصوير الاحترافي 🎬</button>
         
         <div class="viewer-studio">
             <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">جاري توليد المشهد...</div>
+                <div class="status-txt" id="status4">جاري تهيئة محرك الفيديو...</div>
                 <div class="percentage" id="perc4">0%</div>
                 <div class="progress-cont">
                     <div class="progress-fill" id="pb4"></div>
@@ -264,11 +278,10 @@
             </div>
 
             <video id="vid4" controls autoplay loop playsinline></video>
-            <img id="img4" alt="Studio Output">
             
             <div class="action-btns" id="act4">
-                <button class="btn-action" onclick="downloadAsset()">تنزيل 💾</button>
-                <button class="btn-action" id="saveBtn" onclick="saveToSupabase()">حفظ بالخزنة 🦉</button>
+                <button class="btn-action" onclick="downloadVideo()">تنزيل الفيديو 💾</button>
+                <button class="btn-action" id="saveBtn" onclick="saveToVault()">حفظ بالخزنة 🦉</button>
             </div>
         </div>
     </div>
@@ -279,83 +292,88 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    let currentAsset = { url: "", prompt: "", type: "" };
+    let currentVideo = { url: "", prompt: "", model: "" };
 
-    async function fireCinema() {
+    async function fireCinemaV2() {
         const prompt = document.getElementById('p4').value;
-        const mode = document.getElementById('s4').value;
+        const model = document.getElementById('s4').value;
+        const aspect = document.getElementById('asp4').value;
+        const duration = document.getElementById('dur4').value;
         const btn = document.getElementById('fireBtn');
         const loader = document.getElementById('load4');
         const pb = document.getElementById('pb4');
         const perc = document.getElementById('perc4');
         const vid = document.getElementById('vid4');
-        const img = document.getElementById('img4');
+        const status = document.getElementById('status4');
 
-        if(!prompt) return alert("محمديتي، الوصف وين؟");
+        if(!prompt) return alert("محمديتي، الوصف مطلوب!");
 
         btn.disabled = true;
         loader.style.display = 'block';
         vid.style.display = 'none';
-        img.style.display = 'none';
         document.getElementById('act4').style.display = 'none';
 
         let p = 0;
-        let interval = setInterval(() => {
-            if(p < 95) {
-                p += 1;
-                pb.style.width = p + '%';
-                perc.innerText = p + '%';
+        let iv = setInterval(() => {
+            if(p < 98) {
+                p += (p > 80 ? 0.1 : 1);
+                pb.style.width = Math.floor(p) + '%';
+                perc.innerText = Math.floor(p) + '%';
             }
-        }, 300);
+        }, 800);
 
-        const seed = Math.floor(Math.random() * 1000000);
-        // استخدام محرك Flux Animation الجديد (أكثر استقراراً)
-        const finalUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}&model=flux&enhance=true`;
+        const seed = Math.floor(Math.random() * 999999);
+        // بناء الرابط حسب القواعد الجديدة التي وجدتها
+        const finalUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?model=${model}&seed=${seed}&aspectRatio=${aspect}&duration=${duration}&nologo=true`;
 
-        // بما إنَّ الصور المتحركة أضمن حالياً، راح نستخدم الـ Image Load
-        img.src = finalUrl;
-        img.onload = () => {
-            clearInterval(interval);
+        status.innerText = `جاري التوليد باستخدام ${model.toUpperCase()}...`;
+
+        // محاولة تحميل الفيديو
+        vid.src = finalUrl;
+        vid.load();
+
+        vid.onloadeddata = () => {
+            clearInterval(iv);
             pb.style.width = '100%';
             perc.innerText = '100%';
             setTimeout(() => {
                 loader.style.display = 'none';
-                img.style.display = 'block';
+                vid.style.display = 'block';
                 document.getElementById('act4').style.display = 'flex';
                 btn.disabled = false;
-                currentAsset = { url: finalUrl, prompt: prompt, type: 'Animation' };
+                currentVideo = { url: finalUrl, prompt: prompt, model: model };
             }, 500);
         };
 
-        img.onerror = () => {
-            clearInterval(interval);
-            alert("المحرك متوقف للصيانة، جرب وصفاً آخر");
-            btn.disabled = false;
+        vid.onerror = () => {
+            clearInterval(iv);
+            alert("المحرك مشغول حالياً، جرب اختيار موديل آخر مثل WAN أو P-Video");
             loader.style.display = 'none';
+            btn.disabled = false;
         };
     }
 
-    function downloadAsset() {
-        if(currentAsset.url) window.open(currentAsset.url, '_blank');
+    function downloadVideo() {
+        if(currentVideo.url) window.open(currentVideo.url, '_blank');
     }
 
-    async function saveToSupabase() {
+    async function saveToVault() {
         const sBtn = document.getElementById('saveBtn');
         sBtn.disabled = true;
         sBtn.innerText = "جاري الحفظ... ⏳";
 
         const { error } = await _supabase.from('merart_logs').insert([{ 
-            prompt: currentAsset.prompt, 
-            output_url: currentAsset.url, 
-            content_type: currentAsset.type,
-            model_used: 'Flux_Cinema_V1'
+            prompt: currentVideo.prompt, 
+            output_url: currentVideo.url, 
+            content_type: 'Video',
+            model_used: 'Pollinations_' + currentVideo.model 
         }]);
 
         if(!error) {
-            alert("تم الحفظ بنجاح يا محمديتي! ✅");
+            alert("تم الحفظ بنجاح! ✅");
             sBtn.innerText = "تم الحفظ 🦉";
         } else {
-            alert("فشل الحفظ، تأكد من الاتصال");
+            alert("فشل الحفظ!");
             sBtn.disabled = false;
         }
     }
