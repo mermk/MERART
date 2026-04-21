@@ -162,7 +162,7 @@
             overflow: hidden;
         }
 
-        video { 
+        video, img { 
             max-width: 100%; 
             max-height: 500px;
             border-radius: 10px; 
@@ -225,6 +225,15 @@
             border-color: var(--primary-purple); 
             color: var(--primary-purple); 
         }
+
+        .direct-link {
+            display: none;
+            color: var(--primary-purple);
+            margin-top: 10px;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -237,19 +246,19 @@
 </nav>
 
 <div class="header">
-    <h1>MERART VIDEO V1.5</h1>
+    <h1>MERART VIDEO V1.2</h1>
 </div>
 
 <div class="container">
     <div class="section-box">
-        <span class="section-title">محرك السينما (AI Video Engine - Zeroscope)</span>
+        <span class="section-title">محرك السينما المتقدم (Zeroscope & Turbo Animation)</span>
         
         <div class="inputs-row">
             <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
             <select id="s4">
-                <option value="576x320">Wide (Cinema)</option>
-                <option value="320x576">Portrait (TikTok)</option>
-                <option value="448x448">Square (Feed)</option>
+                <option value="video-576x320">Video Mode (Wide)</option>
+                <option value="video-320x576">Video Mode (TikTok)</option>
+                <option value="turbo-512x512">Turbo Animation (Fast)</option>
             </select>
         </div>
         
@@ -265,9 +274,12 @@
             </div>
 
             <video id="vid4" controls autoplay loop playsinline></video>
+            <img id="img4" alt="Turbo Output">
+
+            <div id="direct4" class="direct-link" onclick="openDirect()">فتح الرابط المباشر إذا تأخر المحرك 🔗</div>
             
             <div class="action-btns" id="act4">
-                <button class="btn-action" onclick="dlVideo()">تنزيل الفيديو 💾</button>
+                <button class="btn-action" onclick="dlVideo()">تنزيل 💾</button>
                 <button class="btn-action" id="saveBtn" onclick="saveVideo()">حفظ بالخزنة 🦉</button>
             </div>
         </div>
@@ -286,11 +298,15 @@
         const progressBar = document.getElementById('pb4');
         const percTxt = document.getElementById('perc4');
         const vid = document.getElementById('vid4');
+        const img = document.getElementById('img4');
         const actions = document.getElementById('act4');
         const btn = document.getElementById('fireBtn');
+        const direct = document.getElementById('direct4');
         const prompt = document.getElementById('p4').value;
-        const size = document.getElementById('s4').value;
-        const [w, h] = size.split('x');
+        const config = document.getElementById('s4').value.split('-');
+        
+        const mode = config[0]; // video or turbo
+        const [w, h] = config[1].split('x');
 
         if(!prompt) { 
             alert("محمديتي، اكتب وصف أولاً! 🤨"); 
@@ -299,8 +315,9 @@
 
         btn.disabled = true;
         vid.style.display = 'none';
-        vid.src = "";
+        img.style.display = 'none';
         actions.style.display = 'none';
+        direct.style.display = 'none';
         loader.style.display = 'block';
         
         let progress = 0;
@@ -308,56 +325,67 @@
         percTxt.innerText = '0%';
 
         const seed = Math.floor(Math.random() * 999999999);
-        // تحديث الرابط لضمان عدم وجود كاش قديم وتعطيل اللوجو
-        const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video&nologo=true`;
+        const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=${mode === 'video' ? 'video' : 'turbo'}&nologo=true`;
 
         let interval = setInterval(() => {
             if (progress < 98) {
-                progress += (progress > 80 ? 0.5 : 1);
+                progress += (progress > 80 ? 0.3 : 1);
                 progressBar.style.width = Math.floor(progress) + '%';
                 percTxt.innerText = Math.floor(progress) + '%';
             }
+            if (progress > 20 && mode === 'video') direct.style.display = 'block';
         }, 1000);
 
-        // تحميل الفيديو
-        vid.src = videoUrl;
-        vid.load();
+        if(mode === 'video') {
+            vid.src = videoUrl;
+            vid.load();
+            vid.onloadeddata = () => { finalizeGeneration('Video', videoUrl, seed, interval); };
+            vid.onerror = () => { handleGenerateError(interval); };
+        } else {
+            img.src = videoUrl;
+            img.onload = () => { finalizeGeneration('Animation', videoUrl, seed, interval); };
+            img.onerror = () => { handleGenerateError(interval); };
+        }
+    }
 
-        // بدلاً من انتظار canplay، ننتظر أول ما يوصل "بيانات" (loadeddata)
-        vid.onloadeddata = () => {
-            clearInterval(interval);
-            progressBar.style.width = '100%';
-            percTxt.innerText = '100%';
+    function finalizeGeneration(type, url, seed, interval) {
+        clearInterval(interval);
+        document.getElementById('pb4').style.width = '100%';
+        document.getElementById('perc4').innerText = '100%';
+        
+        setTimeout(() => {
+            document.getElementById('load4').style.display = 'none';
+            if(type === 'Video') {
+                document.getElementById('vid4').style.display = 'block';
+            } else {
+                document.getElementById('img4').style.display = 'block';
+            }
+            document.getElementById('act4').style.display = 'flex';
+            document.getElementById('fireBtn').disabled = false;
             
-            setTimeout(() => {
-                loader.style.display = 'none';
-                vid.style.display = 'block';
-                actions.style.display = 'flex';
-                btn.disabled = false;
-                
-                currentVideoData = { 
-                    prompt: prompt,
-                    output_url: videoUrl,
-                    content_type: 'Video',
-                    model_used: 'Zeroscope:Video_V1',
-                    seed_value: seed
-                };
-            }, 500);
-        };
+            currentVideoData = { 
+                prompt: document.getElementById('p4').value,
+                output_url: url,
+                content_type: type,
+                model_used: type === 'Video' ? 'Zeroscope_V1' : 'Turbo_Anim_V1',
+                seed_value: seed
+            };
+        }, 500);
+    }
 
-        // معالجة الخطأ بطريقة أذكى
-        vid.onerror = (e) => {
-            console.error("Video Error:", e);
-            // أحياناً المتصفح ينطي خطأ بس الفيديو يشتغل إذا سوينا ريفريش للرابط
-            setTimeout(() => {
-                if(vid.networkState === 3) { // إذا فعلاً فشل
-                    clearInterval(interval);
-                    alert("المحرك عليه ضغط حالياً. جرب تضغط 'إطلاق' مرة ثانية أو انتظر ثواني.");
-                    loader.style.display = 'none';
-                    btn.disabled = false;
-                }
-            }, 5000);
-        };
+    function handleGenerateError(interval) {
+        clearInterval(interval);
+        alert("المحرك مشغول. حاول استخدام Turbo Mode أو افتح الرابط المباشر.");
+        document.getElementById('load4').style.display = 'none';
+        document.getElementById('fireBtn').disabled = false;
+    }
+
+    function openDirect() {
+        const prompt = document.getElementById('p4').value;
+        const size = document.getElementById('s4').value.split('-')[1];
+        const [w, h] = size.split('x');
+        const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&model=video`;
+        window.open(url, '_blank');
     }
 
     async function dlVideo() {
@@ -372,30 +400,24 @@
         saveBtn.innerText = "جاري الحفظ... ⏳";
 
         try {
-            const { data, error } = await _supabase
-                .from('merart_logs')
-                .insert([
-                    { 
-                        prompt: currentVideoData.prompt, 
-                        output_url: currentVideoData.output_url, 
-                        content_type: currentVideoData.content_type, 
-                        model_used: currentVideoData.model_used,
-                        seed_value: currentVideoData.seed_value
-                    }
-                ]);
-
+            const { error } = await _supabase.from('merart_logs').insert([
+                { 
+                    prompt: currentVideoData.prompt, 
+                    output_url: currentVideoData.output_url, 
+                    content_type: currentVideoData.content_type, 
+                    model_used: currentVideoData.model_used,
+                    seed_value: currentVideoData.seed_value
+                }
+            ]);
             if (error) throw error;
-
-            alert("تم الحفظ في سجلات MERART بنجاح! ✅");
+            alert("تم الحفظ بنجاح! ✅");
             saveBtn.innerText = "تم الحفظ بنجاح 🦉";
         } catch (err) { 
-            console.error(err);
-            alert("فشل الحفظ: تأكد من تسجيل دخولك."); 
+            alert("فشل الحفظ: " + err.message); 
             saveBtn.disabled = false;
             saveBtn.innerText = "حفظ بالخزنة 🦉";
         }
     }
 </script>
-
 </body>
 </html>
