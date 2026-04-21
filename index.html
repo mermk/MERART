@@ -3,53 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.7.2 - نسخة السيادة المحدثة</title>
+    <title>MERART STUDIO V7.6.0 - نسخة السيادة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
-        body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        
-        /* ستايلات البوابة النيونية (تعديل الثبات) */
-        #vault-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        
-        /* الحلقة اللي تفتر */
-        #vault-ring { width: 450px; height: 450px; border: 4px dashed rgba(46, 204, 113, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; transition: 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); box-shadow: 0 0 30px rgba(46, 204, 113, 0.1); }
-        
-        /* المستطيل الثابت - فصلناه عن دوران الحلقة */
-        #access-box { 
-            position: absolute; /* حتى لا يتأثر بدوران الأب */
-            left: 50%; top: 50%;
-            transform: translate(-50%, -50%) scale(0); 
-            text-align: center; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.3); z-index: 100; opacity: 0; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        
-        #vault-status { color: #2ecc71; font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; text-shadow: 0 0 10px #2ecc71; }
-        #access-key { width: 140px; background: transparent; border: none; border-bottom: 3px solid #2ecc71; color: #2ecc71; text-align: center; font-size: 28px; letter-spacing: 8px; outline: none; text-shadow: 0 0 15px #2ecc71; }
-        
-        @keyframes gearSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes neonPulse { 0%, 100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.3); border-color: rgba(46, 204, 113, 0.5); } 50% { box-shadow: 0 0 40px rgba(46, 204, 113, 0.6); border-color: #2ecc71; } }
-        @keyframes neonErrorPulse { 0%, 100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.4); } 50% { box-shadow: 0 0 50px rgba(231, 76, 60, 0.8); } }
-        @keyframes vaultShake { 0%, 100% { transform: translate(-50%, -50%) translateX(0); } 20% { transform: translate(-50%, -50%) translateX(-15px); } 40% { transform: translate(-50%, -50%) translateX(15px); } 60% { transform: translate(-50%, -50%) translateX(-10px); } 80% { transform: translate(-50%, -50%) translateX(10px); } }
-        
-        /* الحالة النشطة: الحلقة تفتر والمستطيل يثبت */
-        .access-active #vault-ring { animation: gearSpin 15s linear infinite, neonPulse 2s infinite; }
-        .access-active #access-box { transform: translate(-50%, -50%) scale(1) !important; opacity: 1 !important; }
-        
-        /* حالة الخطأ: اهتزاز المستطيل وتوهج أحمر */
-        .wrong-key #access-box { animation: vaultShake 0.3s ease-in-out; border-color: #e74c3c !important; box-shadow: 0 0 20px rgba(231, 76, 60, 0.6) !important; }
-        .wrong-key #vault-ring { border-color: #e74c3c !important; animation: gearSpin 2s linear infinite, neonErrorPulse 0.5s infinite !important; }
-
-        .unlocked #vault-ring { transform: scale(10) rotate(720deg) !important; opacity: 0 !important; filter: blur(20px); pointer-events: none; }
-
-        /* ستايلات الستوديو الأصلية */
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; position: relative; }
+        body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-green); letter-spacing: 10px; margin: 0; font-size: 2.2em; text-transform: uppercase; }
-        
-        /* ستايل زر الانتقال الجديد - مضاف له target="_blank" لاحقاً في الـ HTML */
-        .btn-cinema { position: absolute; left: 10px; top: 15px; padding: 8px 15px; background: transparent; border: 1px solid var(--primary-green); color: var(--primary-green); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.3s; text-decoration: none; }
-        .btn-cinema:hover { background: var(--primary-green); color: black; box-shadow: 0 0 15px var(--primary-green); }
-
-        .container { width: 100%; max-width: 850px; display: none; opacity: 0; transition: 1s ease-in; } 
+        .container { width: 100%; max-width: 850px; }
         .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         .section-title { color: var(--primary-green); font-weight: bold; margin-bottom: 20px; display: block; border-right: 5px solid var(--primary-green); padding-right: 15px; font-size: 1.1em; }
         .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
@@ -71,18 +32,9 @@
 </head>
 <body>
 
-<div id="vault-overlay">
-    <div id="vault-ring"></div> <div id="access-box"> <div id="vault-status">AWAITING MASTER ACCESS</div>
-        <input type="password" id="access-key" placeholder="••••" maxlength="4" autofocus>
-    </div>
-</div>
+<div class="header"><h1>MERART STUDIO V7.6.0</h1></div>
 
-<div class="header">
-    <h1>MERART STUDIO V7.7.2</h1>
-    <a href="video.html" target="_blank" class="btn-cinema">السينما 🎬</a>
-</div>
-
-<div class="container" id="main-studio">
+<div class="container">
     <div class="section-box">
         <span class="section-title">1. التوليد المباشر (Extreme Realism & Control)</span>
         <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
@@ -172,57 +124,6 @@
 </div>
 
 <script>
-    const MASTER_KEY = "1111"; 
-    
-    window.addEventListener('DOMContentLoaded', () => {
-        const overlay = document.getElementById('vault-overlay');
-        const accessKeyInput = document.getElementById('access-key');
-        
-        // البداية: البوابة تفتر فارغة
-        setTimeout(() => { 
-            overlay.classList.add('access-active'); 
-        }, 500); 
-
-        accessKeyInput.addEventListener('input', function(e) {
-            if(this.value.length === 4) { validateVault(this.value); }
-        });
-    });
-
-    function validateVault(val) {
-        const ring = document.getElementById('vault-ring');
-        const overlay = document.getElementById('vault-overlay');
-        const status = document.getElementById('vault-status');
-        const studio = document.getElementById('main-studio');
-
-        if(val === MASTER_KEY) {
-            status.innerText = "ACCESS GRANTED - LOGGING IN...";
-            status.style.color = "#2ecc71";
-            ring.style.animation = "gearSpin 0.5s linear infinite";
-            
-            setTimeout(() => {
-                overlay.classList.add('unlocked');
-                overlay.style.backgroundColor = "transparent";
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    studio.style.display = 'block';
-                    setTimeout(() => { studio.style.opacity = '1'; }, 50);
-                }, 800);
-            }, 600);
-        } else {
-            status.innerText = "ACCESS DENIED - INVALID CODE";
-            status.style.color = "#e74c3c";
-            overlay.classList.add('wrong-key');
-            
-            setTimeout(() => {
-                overlay.classList.remove('wrong-key');
-                document.getElementById('access-key').value = '';
-                status.innerText = "AWAITING MASTER ACCESS";
-                status.style.color = "#2ecc71";
-            }, 1200);
-        }
-    }
-
-    // --- سكربت الستوديو الأصلي مالتك كامل ومحفوظ ---
     const CLOUDFLARE_ENDPOINT = "https://x.nol-30c.workers.dev/";
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
@@ -355,11 +256,13 @@
             const seed = Math.floor(Math.random()*99999999);
 
             if (host === 'pollinations_raw') {
-                if(statusTxt) statusTxt.innerText = "Bypassing Gateway Filters...";
+                statusTxt.innerText = "Bypassing Gateway Filters...";
+                // تعديل المعاملات: إضافة &safe=false وتثبيت enhance=false
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&cache=false`;
             } 
             else if (host === 'nol_ultra') {
-                if(statusTxt) statusTxt.innerText = "Executing ULTRA RAW Bypass...";
+                statusTxt.innerText = "Executing ULTRA RAW Bypass...";
+                // تكتيك المحرك السابع: وصف المناطق بوضوح لمنع التشويه
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered, no blur effects" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false`;
             }
             else if (host === 'ghost') {
@@ -412,39 +315,9 @@
         } catch (err) { alert("فشل الحفظ!"); }
     }
 
-    // التحديث الجوهري: دالة التنزيل الاحترافية بنظام الـ Blob والـ Target الجديد
-    async function dl(id) {
-        const imageUrl = storedUrls[id].url;
-        const fileName = `MERART_STUDIO_${Date.now()}.png`;
-
-        try {
-            // استخدام fetch لجلب الصورة كـ Blob لتحميلها مباشرة
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = fileName;
-            // إضافة target للتأكيد على الفتح الخارجي إذا فشل التحميل لسبب ما
-            a.target = '_blank'; 
-            
-            document.body.appendChild(a);
-            a.click();
-            
-            // تنظيف الذاكرة بعد التحميل
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (err) {
-            // حالة احتياطية إذا كان السيرفر يمنع الـ CORS
-            console.warn("CORS fetch failed, falling back to direct link.");
-            const a = document.createElement('a');
-            a.href = imageUrl;
-            a.download = fileName;
-            a.target = '_blank';
-            a.click();
-        }
+    function dl(id) {
+        const a = document.createElement('a'); a.href = storedUrls[id].url;
+        a.download = `MERART_STUDIO_${Date.now()}.png`; a.click();
     }
 </script>
 </body>
