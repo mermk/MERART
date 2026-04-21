@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.7.1 - نسخة السيادة</title>
+    <title>MERART STUDIO V7.7.2 - نسخة السيادة المحدثة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -45,7 +45,7 @@
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; position: relative; }
         .header h1 { color: var(--primary-green); letter-spacing: 10px; margin: 0; font-size: 2.2em; text-transform: uppercase; }
         
-        /* ستايل زر الانتقال الجديد */
+        /* ستايل زر الانتقال الجديد - مضاف له target="_blank" لاحقاً في الـ HTML */
         .btn-cinema { position: absolute; left: 10px; top: 15px; padding: 8px 15px; background: transparent; border: 1px solid var(--primary-green); color: var(--primary-green); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.3s; text-decoration: none; }
         .btn-cinema:hover { background: var(--primary-green); color: black; box-shadow: 0 0 15px var(--primary-green); }
 
@@ -78,8 +78,8 @@
 </div>
 
 <div class="header">
-    <h1>MERART STUDIO V7.7.1</h1>
-    <a href="video.html" class="btn-cinema">السينما 🎬</a>
+    <h1>MERART STUDIO V7.7.2</h1>
+    <a href="video.html" target="_blank" class="btn-cinema">السينما 🎬</a>
 </div>
 
 <div class="container" id="main-studio">
@@ -412,9 +412,39 @@
         } catch (err) { alert("فشل الحفظ!"); }
     }
 
-    function dl(id) {
-        const a = document.createElement('a'); a.href = storedUrls[id].url;
-        a.download = `MERART_STUDIO_${Date.now()}.png`; a.click();
+    // التحديث الجوهري: دالة التنزيل الاحترافية بنظام الـ Blob والـ Target الجديد
+    async function dl(id) {
+        const imageUrl = storedUrls[id].url;
+        const fileName = `MERART_STUDIO_${Date.now()}.png`;
+
+        try {
+            // استخدام fetch لجلب الصورة كـ Blob لتحميلها مباشرة
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+            // إضافة target للتأكيد على الفتح الخارجي إذا فشل التحميل لسبب ما
+            a.target = '_blank'; 
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            // تنظيف الذاكرة بعد التحميل
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            // حالة احتياطية إذا كان السيرفر يمنع الـ CORS
+            console.warn("CORS fetch failed, falling back to direct link.");
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = fileName;
+            a.target = '_blank';
+            a.click();
+        }
     }
 </script>
 </body>
