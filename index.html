@@ -7,28 +7,34 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
-        body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* ستايل الخزنة (The Vault UI) */
-        #vault-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: 1s ease-in-out; }
-        #vault-door { width: 320px; height: 320px; border: 10px solid #1a1a1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; transition: 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 50px rgba(46, 204, 113, 0.05); }
-        .vault-gear { position: absolute; width: 110%; height: 110%; border: 3px dashed var(--primary-green); border-radius: 50%; opacity: 0.2; animation: gearSpin 15s linear infinite; }
-        #access-box { text-align: center; z-index: 10; }
-        #vault-status { color: var(--primary-green); font-size: 11px; letter-spacing: 2px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
-        #access-key { width: 140px; background: transparent; border: none; border-bottom: 3px solid var(--primary-green); color: var(--primary-green); text-align: center; font-size: 28px; letter-spacing: 8px; outline: none; transition: 0.3s; }
-        .blink-status { animation: blinker 1.5s infinite; }
-        
-        @keyframes gearSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes blinker { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-        @keyframes vaultShake { 0%, 100% { transform: translate(0); } 20% { transform: translate(-15px); } 40% { transform: translate(15px); } 60% { transform: translate(-10px); } 80% { transform: translate(10px); } }
-        
-        .wrong-key { border-color: #e74c3c !important; animation: vaultShake 0.3s ease-in-out infinite !important; }
-        .unlocked { transform: scale(10) rotate(720deg) !important; opacity: 0 !important; pointer-events: none; }
+        /* 🛡️ تصميم الخزنة الميكانيكي الجديد - حصري لحمودي */
+        #vault-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .vault-container { position: relative; width: 350px; height: 350px; display: flex; align-items: center; justify-content: center; }
+        #vault-door { 
+            width: 100%; height: 100%; background: #151515; border: 12px solid #222; border-radius: 50%; 
+            position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 0 10px #0a0a0a, 0 20px 50px rgba(0,0,0,1), inset 0 0 50px rgba(46, 204, 113, 0.05);
+            transition: 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); z-index: 2;
+        }
+        .bolt { position: absolute; width: 15px; height: 15px; background: #222; border-radius: 50%; box-shadow: inset 0 2px 5px rgba(255,255,255,0.1); }
+        .bolt:nth-child(1) { top: 15px; } .bolt:nth-child(2) { bottom: 15px; }
+        .bolt:nth-child(3) { left: 15px; } .bolt:nth-child(4) { right: 15px; }
+        .handle-wheel { position: absolute; width: 180px; height: 180px; border: 12px solid #1a1a1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 3; }
+        .handle-bar { position: absolute; width: 220px; height: 15px; background: #1a1a1a; border-radius: 10px; }
+        .handle-bar:nth-child(2) { transform: rotate(90deg); }
+        #access-box { position: relative; z-index: 10; background: #000; padding: 15px; border-radius: 10px; border: 1px solid var(--primary-green); box-shadow: 0 0 20px rgba(46, 204, 113, 0.2); }
+        #vault-status { color: var(--primary-green); font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; text-align: center; font-weight: bold; }
+        #access-key { width: 100px; background: transparent; border: none; border-bottom: 2px solid var(--primary-green); color: var(--primary-green); text-align: center; font-size: 22px; outline: none; }
+        .unlocked { transform: scale(3) rotate(180deg) !important; opacity: 0 !important; filter: blur(15px); pointer-events: none; }
+        .wrong-key { border-color: #e74c3c !important; animation: shake 0.3s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
-        /* باقي ستايلات الستوديو الأصلية */
+        /* ستايلات الستوديو الأصلية */
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; }
         .header h1 { color: var(--primary-green); letter-spacing: 10px; margin: 0; font-size: 2.2em; text-transform: uppercase; }
-        .container { width: 100%; max-width: 850px; display: none; } /* مخفي حتى يتم التأكد */
+        .container { width: 100%; max-width: 850px; display: none; } /* مخفي حتى يفتح القفل */
         .section-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         .section-title { color: var(--primary-green); font-weight: bold; margin-bottom: 20px; display: block; border-right: 5px solid var(--primary-green); padding-right: 15px; font-size: 1.1em; }
         .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
@@ -51,18 +57,24 @@
 <body>
 
 <div id="vault-overlay">
-    <div id="vault-door">
-        <div class="vault-gear"></div>
-        <div id="access-box">
-            <div id="vault-status" class="blink-status">AWAITING MASTER ACCESS</div>
-            <input type="password" id="access-key" placeholder="••••" maxlength="4" autocomplete="off">
+    <div class="vault-container">
+        <div id="vault-door">
+            <div class="bolt"></div><div class="bolt"></div><div class="bolt"></div><div class="bolt"></div>
+            <div class="handle-wheel">
+                <div class="handle-bar"></div>
+                <div class="handle-bar"></div>
+                <div id="access-box">
+                    <div id="vault-status">VAULT SYSTEM</div>
+                    <input type="password" id="access-key" placeholder="••••" maxlength="4" autocomplete="off">
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="header"><h1>MERART STUDIO V7.6.1</h1></div>
 
-<div class="container" id="main-studio">
+<div class="container" id="main-content">
     <div class="section-box">
         <span class="section-title">1. التوليد المباشر (Extreme Realism & Control)</span>
         <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
@@ -152,59 +164,38 @@
 </div>
 
 <script>
-    // نظام الأمان والتحكم بالخزنة
-    const MASTER_KEY = "1111"; // حمودي، غير الكود منا براحتك
-    
+    // 🔐 منطق الخزنة (The Vault Logic) - حصري لحمودي
+    const MASTER_KEY = "1111";
     document.getElementById('access-key').addEventListener('input', function(e) {
         if(this.value.length === 4) {
-            validateVault(this.value);
+            if(this.value === MASTER_KEY) {
+                document.getElementById('vault-status').innerText = "ACCESS GRANTED";
+                document.getElementById('vault-door').classList.add('unlocked');
+                setTimeout(() => {
+                    document.getElementById('vault-overlay').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                }, 1000);
+            } else {
+                document.getElementById('access-box').classList.add('wrong-key');
+                document.getElementById('vault-status').innerText = "ACCESS DENIED";
+                setTimeout(() => {
+                    document.getElementById('access-box').classList.remove('wrong-key');
+                    this.value = '';
+                    document.getElementById('vault-status').innerText = "VAULT SYSTEM";
+                }, 800);
+            }
         }
     });
 
-    function validateVault(val) {
-        const door = document.getElementById('vault-door');
-        const status = document.getElementById('vault-status');
-        const overlay = document.getElementById('vault-overlay');
-        const studio = document.getElementById('main-studio');
-
-        if(val === MASTER_KEY) {
-            status.innerText = "IDENTITY CONFIRMED";
-            status.style.color = "#2ecc71";
-            door.classList.add('unlocked');
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                studio.style.display = 'block';
-            }, 1000);
-        } else {
-            status.innerText = "ACCESS DENIED - WRONG KEY";
-            status.style.color = "#e74c3c";
-            door.classList.add('wrong-key');
-            door.style.transform = 'rotate(-360deg)';
-            
-            setTimeout(() => {
-                door.classList.remove('wrong-key');
-                door.style.transform = 'rotate(0deg)';
-                document.getElementById('access-key').value = '';
-                status.innerText = "AWAITING MASTER ACCESS";
-                status.style.color = "#2ecc71";
-            }, 1000);
-        }
-    }
-
-    // تأثير الدوران الأولي
-    window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            document.getElementById('vault-door').style.transform = 'rotate(360deg)';
-        }, 300);
-    });
-
-    // سكريبتات الستوديو الأصلية (بدون تغيير حرف واحد)
+    // سكريبتات الستوديو الأصلية (بدون أي حذف)
     const CLOUDFLARE_ENDPOINT = "https://x.nol-30c.workers.dev/";
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
+    const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
+    
     const MERART_ASSETS = {
         "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
         "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
@@ -213,6 +204,7 @@
     };
 
     let storedUrls = {};
+
     const hostData = {
         pollinations: [
             {v: "flux-pro", n: "Flux.1 [pro] (الرتبة العليا)"},
@@ -294,18 +286,26 @@
         const img = document.getElementById(`img${id}`);
         const actions = document.getElementById(`act${id}`);
         const statusTxt = document.getElementById(`status${id}`);
+        
         img.style.display = 'none'; actions.style.display = 'none';
         loader.style.display = 'block';
+        
         let host = document.getElementById('host-select').value;
         let model = (id===1)?document.getElementById('m1').value:document.getElementById('m2').value;
         let size = (id===1)?document.getElementById('s1').value:"1024x1024";
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
+        
         let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
         let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
         let smartPrompt = injection.final;
-        if(refUrl !== "") smartPrompt = `${refUrl} , strictly follow the facial features and structure , ${smartPrompt}`;
-        const bypassCode = ", (unfiltered:1.6), raw anatomy, no censorship, high-res textures, full detail, hyper-realism, non-blurred";
+
+        if(refUrl !== "") {
+            smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
+        }
+
+        const bypassCode = ", (unfiltered:1.6), raw anatomy, no censorship, high-res textures, full detail, hyper-realism, non-blurred, (explicit detail:1.2)";
+
         let progress = 0;
         let interval = setInterval(() => {
             if (progress < 96) {
@@ -314,14 +314,20 @@
                 percTxt.innerText = progress + '%';
             }
         }, 300);
+
         try {
             let finalUrl = "";
             const seed = Math.floor(Math.random()*99999999);
+
             if (host === 'pollinations_raw') {
+                if(statusTxt) statusTxt.innerText = "Bypassing Gateway Filters...";
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&cache=false`;
-            } else if (host === 'nol_ultra') {
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false`;
-            } else if (host === 'ghost') {
+            } 
+            else if (host === 'nol_ultra') {
+                if(statusTxt) statusTxt.innerText = "Executing ULTRA RAW Bypass...";
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered, no blur effects" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false`;
+            }
+            else if (host === 'ghost') {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -329,21 +335,34 @@
                 });
                 const imageBlob = await response.blob();
                 finalUrl = URL.createObjectURL(imageBlob);
-            } else {
+            }
+            else {
                 finalUrl = (host === 'nol') ? 
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false` :
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
             }
+
             await new Promise((resolve, reject) => {
-                const temp = new Image(); temp.crossOrigin = "anonymous";
-                temp.src = finalUrl; temp.onload = resolve; temp.onerror = reject;
+                const temp = new Image();
+                temp.crossOrigin = "anonymous";
+                temp.src = finalUrl;
+                temp.onload = resolve;
+                temp.onerror = reject;
             });
+
             clearInterval(interval);
-            progressBar.style.width = '100%'; percTxt.innerText = '100%';
-            loader.style.display = 'none'; img.src = finalUrl; img.style.display = 'block'; actions.style.display = 'flex';
+            progressBar.style.width = '100%';
+            percTxt.innerText = '100%';
+            loader.style.display = 'none';
+            img.src = finalUrl;
+            img.style.display = 'block';
+            actions.style.display = 'flex';
             storedUrls[id] = { url: finalUrl, prompt: smartPrompt, model: host + ":" + model };
+
         } catch (err) {
-            clearInterval(interval); alert("فشل في المحرك: " + err.message); loader.style.display = 'none';
+            clearInterval(interval);
+            alert("فشل في المحرك: " + err.message);
+            loader.style.display = 'none';
         }
     }
 
