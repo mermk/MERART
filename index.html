@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.7.1 - نسخة السيادة</title>
+    <title>MERART STUDIO V7.6.0 - نسخة السيادة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -28,13 +28,11 @@
         .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-action:hover { border-color: var(--primary-green); color: var(--primary-green); }
         .ref-box { border: 1px solid #2ecc7133; padding: 10px; border-radius: 10px; margin-bottom: 10px; background: #1a2e2122; }
-        #token-manual-box { display: none; margin-bottom: 15px; border: 1px solid var(--primary-green); border-radius: 12px; padding: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 5px #2ecc7133; } 50% { box-shadow: 0 0 15px #2ecc7166; } 100% { box-shadow: 0 0 5px #2ecc7133; } }
     </style>
 </head>
 <body>
 
-<div class="header"><h1>MERART STUDIO V7.7.0</h1></div>
+<div class="header"><h1>MERART STUDIO V7.6.0</h1></div>
 
 <div class="container">
     <div class="section-box">
@@ -57,11 +55,6 @@
                 <option value="1280x720">Landscape (16:9)</option>
             </select>
         </div>
-
-        <div id="token-manual-box">
-            <input type="password" id="manual_hf_token" placeholder="أدخل توكن HF WRITE لتفعيل السيادة...">
-        </div>
-
         <div class="ref-box">
             <input type="text" id="ref1" placeholder="أدخل رابط صورة الملامح من بنترست (إختياري - ControlNet)...">
         </div>
@@ -135,9 +128,11 @@
     const CLOUDFLARE_ENDPOINT = "https://x.nol-30c.workers.dev/";
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
+    const HF_TOKEN = "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"; // توكن WRITE مالتك
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
+    const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
     
     const MERART_ASSETS = {
         "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
@@ -205,8 +200,6 @@
     function updateModels() {
         const host = document.getElementById('host-select').value;
         const modelSelect = document.getElementById('m1');
-        const tokenBox = document.getElementById('token-manual-box');
-        tokenBox.style.display = (host === 'merart_sovereign') ? 'block' : 'none';
         modelSelect.innerHTML = '';
         hostData[host].forEach(m => {
             let opt = document.createElement('option');
@@ -245,11 +238,16 @@
         let size = (id===1)?document.getElementById('s1').value:"1024x1024";
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
+        
         let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
         let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
         let smartPrompt = injection.final;
-        if(refUrl !== "") smartPrompt = `${refUrl} , strictly follow the facial features , ${smartPrompt}`;
-        const bypassCode = ", (unfiltered:1.6), raw anatomy, no censorship, high-res textures, full detail, hyper-realism, non-blurred";
+
+        if(refUrl !== "") {
+            smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
+        }
+
+        const bypassCode = ", (unfiltered:1.6), raw anatomy, no censorship, high-res textures, full detail, hyper-realism, non-blurred, (explicit detail:1.2)";
 
         let progress = 0;
         let interval = setInterval(() => {
@@ -265,36 +263,37 @@
             const seed = Math.floor(Math.random()*99999999);
 
             if (host === 'merart_sovereign') {
-                const manualToken = document.getElementById('manual_hf_token').value.trim();
-                if(!manualToken) throw new Error("يا 'حمودي' التوكن فارغ!");
-
-                statusTxt.innerText = "Sovereign Engine: Crossing Barriers...";
-                
-                // استخدام البروكسي المدمج لتجاوز حماية المتصفح (Brave Shields)
-                const proxyUrl = "https://corsproxy.io/?";
-                const targetUrl = `https://api-inference.huggingface.co/models/${model}`;
-
-                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+                statusTxt.innerText = "Sovereign Engine: Connecting to Private API...";
+                const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
                     method: 'POST',
                     headers: {
-                        "Authorization": `Bearer ${manualToken}`,
+                        "Authorization": `Bearer ${HF_TOKEN}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         inputs: smartPrompt + bypassCode,
-                        parameters: { seed: seed, width: parseInt(w), height: parseInt(h), wait_for_model: true }
+                        parameters: { seed: seed, width: parseInt(w), height: parseInt(h) }
                     })
                 });
 
-                if (response.status === 503) throw new Error("الموديل جاي يحمي.. انتظر شوية وجرب مرة ثانية.");
-
                 if (!response.ok) {
-                    const errBody = await response.text();
-                    throw new Error("السيرفر رفض الطلب. تأكد من صحة التوكن.");
+                    const errData = await response.json();
+                    if(errData.error && errData.error.includes("loading")) {
+                        throw new Error("الموديل جاي يتحمل على السيرفر.. انتظر 30 ثانية وحدث الصفحة.");
+                    }
+                    throw new Error("سيرفر Hugging Face مشغول حالياً.");
                 }
 
                 const blob = await response.blob();
                 finalUrl = URL.createObjectURL(blob);
+            }
+            else if (host === 'pollinations_raw') {
+                statusTxt.innerText = "Bypassing Gateway Filters...";
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&cache=false`;
+            } 
+            else if (host === 'nol_ultra') {
+                statusTxt.innerText = "Executing ULTRA RAW Bypass...";
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered, no blur effects" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false`;
             }
             else if (host === 'ghost') {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
@@ -306,10 +305,9 @@
                 finalUrl = URL.createObjectURL(imageBlob);
             }
             else {
-                let engineBase = (host === 'pollinations_raw' || host === 'nol_ultra') ? 
-                    `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&safe=false` :
+                finalUrl = (host === 'nol') ? 
+                    `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false` :
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
-                finalUrl = engineBase;
             }
 
             if (host !== 'merart_sovereign' && host !== 'ghost') {
@@ -333,7 +331,7 @@
 
         } catch (err) {
             clearInterval(interval);
-            alert("يا حمودي صار خلل: " + err.message);
+            alert("فشل في المحرك: " + err.message);
             loader.style.display = 'none';
         }
     }
@@ -351,7 +349,7 @@
 
     function dl(id) {
         const a = document.createElement('a'); a.href = storedUrls[id].url;
-        a.download = `MERART_${Date.now()}.png`; a.click();
+        a.download = `MERART_STUDIO_${Date.now()}.png`; a.click();
     }
 </script>
 </body>
