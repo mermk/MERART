@@ -138,9 +138,14 @@
             text-transform: uppercase;
         }
 
-        .btn-gen:hover { 
+        .btn-gen:hover:not(:disabled) { 
             filter: brightness(1.2); 
             box-shadow: 0 0 20px var(--primary-purple); 
+        }
+
+        .btn-gen:disabled {
+            background: #444;
+            cursor: not-allowed;
         }
 
         .viewer-studio { 
@@ -252,7 +257,7 @@
         
         <div class="viewer-studio">
             <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">جاري معالجة المشهد... (قد يستغرق دقيقة)</div>
+                <div class="status-txt" id="status4">جاري توليد المشهد.. انتظر قليلاً</div>
                 <div class="percentage" id="perc4">0%</div>
                 <div class="progress-cont">
                     <div class="progress-fill" id="pb4"></div>
@@ -263,20 +268,21 @@
             
             <div class="action-btns" id="act4">
                 <button class="btn-action" onclick="dlVideo()">تنزيل الفيديو 💾</button>
-                <button class="btn-action" onclick="saveVideo()">حفظ بالخزنة 🦉</button>
+                <button class="btn-action" id="saveBtn" onclick="saveVideo()">حفظ بالخزنة 🦉</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // بيانات السوبابيس المعتمدة
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    let storedUrls = {};
+    let currentVideoData = null;
 
-    async function fireVideo() {
+    function fireVideo() {
         const loader = document.getElementById('load4');
         const progressBar = document.getElementById('pb4');
         const percTxt = document.getElementById('perc4');
@@ -292,9 +298,9 @@
             return; 
         }
 
-        // تحضير الواجهة
         btn.disabled = true;
         vid.style.display = 'none';
+        vid.src = "";
         actions.style.display = 'none';
         loader.style.display = 'block';
         
@@ -302,77 +308,83 @@
         progressBar.style.width = '0%';
         percTxt.innerText = '0%';
 
-        // أنيميشن وهمي للتحميل لغاية ما يجهز الفيديو فعلياً
+        const seed = Math.floor(Math.random() * 999999999);
+        const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video`;
+
         let interval = setInterval(() => {
-            if (progress < 90) {
-                progress += Math.floor(Math.random() * 3) + 1;
+            if (progress < 95) {
+                progress += 1;
                 progressBar.style.width = progress + '%';
                 percTxt.innerText = progress + '%';
             }
-        }, 1500);
+        }, 800);
 
-        try {
-            const seed = Math.floor(Math.random() * 999999);
-            // استخدمنا رابط مباشر لـ Pollinations مع موديل الفيديو
-            const videoUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video`;
+        vid.src = videoUrl;
 
-            // محاولة التأكد من أن السيرفر استلم الطلب
-            const checkRes = await fetch(videoUrl);
-            if (!checkRes.ok) throw new Error("السيرفر مشغول، حاول لاحقاً.");
-
-            // انتظار تحميل الميتا داتا للفيديو للتأكد أنه جاهز للتشغيل
-            vid.src = videoUrl;
-            vid.load();
-
-            vid.oncanplay = () => {
-                clearInterval(interval);
-                progressBar.style.width = '100%';
-                percTxt.innerText = '100%';
-                
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    vid.style.display = 'block';
-                    actions.style.display = 'flex';
-                    btn.disabled = false;
-                    
-                    storedUrls[4] = { 
-                        url: videoUrl, 
-                        prompt: prompt, 
-                        model: "Zeroscope:Video_V1" 
-                    };
-                }, 500);
-            };
-
-            vid.onerror = () => {
-                throw new Error("حدث خطأ أثناء تحميل الفيديو.");
-            };
-
-        } catch (err) {
+        vid.oncanplay = () => {
             clearInterval(interval);
-            alert("عذراً حمودي: " + err.message);
+            progressBar.style.width = '100%';
+            percTxt.innerText = '100%';
+            
+            setTimeout(() => {
+                loader.style.display = 'none';
+                vid.style.display = 'block';
+                actions.style.display = 'flex';
+                btn.disabled = false;
+                
+                // خزن البيانات محلياً حتى نرفعها للـ SQL
+                currentVideoData = { 
+                    prompt: prompt,
+                    output_url: videoUrl,
+                    content_type: 'Video',
+                    model_used: 'Zeroscope:Video_V1',
+                    seed_value: seed
+                };
+            }, 500);
+        };
+
+        vid.onerror = () => {
+            clearInterval(interval);
+            alert("المحرك مشغول، حاول مرة ثانية يا بطل.");
             loader.style.display = 'none';
             btn.disabled = false;
-        }
+        };
     }
 
     async function dlVideo() {
-        const url = storedUrls[4].url;
-        window.open(url, '_blank'); // فتح الفيديو في نافذة جديدة للتحميل المباشر
+        if(currentVideoData) window.open(currentVideoData.output_url, '_blank');
     }
 
     async function saveVideo() {
-        const data = storedUrls[4];
+        const saveBtn = document.getElementById('saveBtn');
+        if(!currentVideoData) return;
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = "جاري الحفظ... ⏳";
+
         try {
-            const { error } = await _supabase.from('merart_logs').insert([{ 
-                prompt: data.prompt, 
-                output_url: data.url, 
-                content_type: 'Video', 
-                model_used: data.model 
-            }]);
-            if(error) throw error;
-            alert("تم حفظ المشهد بنجاح! ✅");
+            // تنفيذ الإضافة لجدول merart_logs حسب هيكل الـ SQL الخاص بك
+            const { data, error } = await _supabase
+                .from('merart_logs')
+                .insert([
+                    { 
+                        prompt: currentVideoData.prompt, 
+                        output_url: currentVideoData.output_url, 
+                        content_type: currentVideoData.content_type, 
+                        model_used: currentVideoData.model_used,
+                        seed_value: currentVideoData.seed_value
+                    }
+                ]);
+
+            if (error) throw error;
+
+            alert("تم الحفظ في سجلات MERART بنجاح! ✅");
+            saveBtn.innerText = "تم الحفظ بنجاح 🦉";
         } catch (err) { 
-            alert("فشل الحفظ!"); 
+            console.error(err);
+            alert("فشل الحفظ: " + (err.message || "تأكد من تسجيل الدخول أو إعدادات الـ RLS")); 
+            saveBtn.disabled = false;
+            saveBtn.innerText = "حفظ بالخزنة 🦉";
         }
     }
 </script>
