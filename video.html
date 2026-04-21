@@ -26,6 +26,36 @@
             overflow-x: hidden; 
         }
 
+        /* ستايل زر الرجوع */
+        .back-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .btn-back {
+            background: rgba(142, 68, 173, 0.1);
+            border: 1px solid var(--primary-purple);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-back:hover {
+            background: var(--primary-purple);
+            box-shadow: 0 0 20px var(--primary-purple);
+            transform: translateX(-5px);
+        }
+
         /* ستايل الهيدر */
         .header { 
             text-align: center; 
@@ -208,6 +238,13 @@
 </head>
 <body>
 
+<nav class="back-nav">
+    <a href="index.html" class="btn-back">
+        <span>رجوع للملف الشخصي</span>
+        <i>➜</i>
+    </a>
+</nav>
+
 <div class="header">
     <h1>MERART VIDEO V1.0</h1>
 </div>
@@ -247,7 +284,6 @@
 </div>
 
 <script>
-    // بيانات السوبابيس المستخرجة من كود محمديتي الأصلي
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -269,7 +305,6 @@
             return; 
         }
 
-        // تصفير الواجهة
         vid.style.display = 'none';
         actions.style.display = 'none';
         loader.style.display = 'block';
@@ -278,7 +313,6 @@
         progressBar.style.width = '0%';
         percTxt.innerText = '0%';
 
-        // انيميشن التحميل
         let interval = setInterval(() => {
             if (progress < 97) {
                 progress += Math.floor(Math.random() * 2) + 1;
@@ -291,7 +325,6 @@
             const seed = Math.floor(Math.random() * 999999);
             const videoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=video&nologo=true`;
 
-            // جلب الفيديو
             const response = await fetch(videoUrl);
             if (!response.ok) throw new Error("المحرك مشغول حالياً، جرب مرة ثانية.");
 
