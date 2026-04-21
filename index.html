@@ -28,6 +28,10 @@
         .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-action:hover { border-color: var(--primary-green); color: var(--primary-green); }
         .ref-box { border: 1px solid #2ecc7133; padding: 10px; border-radius: 10px; margin-bottom: 10px; background: #1a2e2122; }
+        
+        /* تصميم حقل التوكن اليدوي */
+        #token-manual-box { display: none; margin-bottom: 15px; border: 1px solid var(--primary-green); border-radius: 12px; padding: 5px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 5px #2ecc7133; } 50% { box-shadow: 0 0 15px #2ecc7166; } 100% { box-shadow: 0 0 5px #2ecc7133; } }
     </style>
 </head>
 <body>
@@ -46,6 +50,7 @@
                 <option value="ghost">GHOST (Cloudflare - نيرونات)</option>
                 <option value="pollinations_raw">6. Pollinations (NSFW / Unfiltered)</option>
                 <option value="nol_ultra">7. NOL Ultra (Extreme RAW Bypass)</option>
+                <option value="merart_sovereign">8. MERART Sovereign (The Uncensored API)</option>
             </select>
             <select id="m1"></select>
             <select id="s1">
@@ -54,6 +59,11 @@
                 <option value="1280x720">Landscape (16:9)</option>
             </select>
         </div>
+
+        <div id="token-manual-box">
+            <input type="password" id="manual_hf_token" placeholder="أدخل توكن HF WRITE لتفعيل السيادة...">
+        </div>
+
         <div class="ref-box">
             <input type="text" id="ref1" placeholder="أدخل رابط صورة الملامح من بنترست (إختياري - ControlNet)...">
         </div>
@@ -130,7 +140,6 @@
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
     const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
-    const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
     
     const MERART_ASSETS = {
         "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
@@ -187,12 +196,22 @@
         nol_ultra: [
             {v: "flux", n: "ULTRA: Flux RAW Bypass"},
             {v: "astraliteheart/pony-diffusion-v6-xl", n: "ULTRA: Pony Realism Uncensored"}
+        ],
+        merart_sovereign: [
+            {v: "astraliteheart/pony-diffusion-v6-xl", n: "SOVEREIGN: Pony V6 XL (No Filter)"},
+            {v: "SG161222/RealVisXL_V4.0", n: "SOVEREIGN: RealVisXL 4.0 (Hyper Real)"},
+            {v: "cagliostrolab/animagine-xl-3.1", n: "SOVEREIGN: Animagine XL (High Art)"}
         ]
     };
 
     function updateModels() {
         const host = document.getElementById('host-select').value;
         const modelSelect = document.getElementById('m1');
+        const tokenBox = document.getElementById('token-manual-box');
+        
+        // إظهار حقل التوكن فقط عند اختيار المحرك الثامن
+        tokenBox.style.display = (host === 'merart_sovereign') ? 'block' : 'none';
+
         modelSelect.innerHTML = '';
         hostData[host].forEach(m => {
             let opt = document.createElement('option');
@@ -255,14 +274,41 @@
             let finalUrl = "";
             const seed = Math.floor(Math.random()*99999999);
 
-            if (host === 'pollinations_raw') {
+            if (host === 'merart_sovereign') {
+                // سحب التوكن من الحقل اليدوي
+                const manualToken = document.getElementById('manual_hf_token').value.trim();
+                if(!manualToken) throw new Error("يا غالي، لازم تخلي التوكن اليدوي حتى يشتغل المحرك الثامن!");
+
+                statusTxt.innerText = "Sovereign Engine: Connecting to Private API...";
+                const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+                    method: 'POST',
+                    headers: {
+                        "Authorization": `Bearer ${manualToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        inputs: smartPrompt + bypassCode,
+                        parameters: { seed: seed, width: parseInt(w), height: parseInt(h) }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    if(errData.error && errData.error.includes("loading")) {
+                        throw new Error("الموديل جاي يتحمل على السيرفر.. انتظر 30 ثانية وحدث الصفحة.");
+                    }
+                    throw new Error("سيرفر Hugging Face مشغول أو التوكن خطأ.");
+                }
+
+                const blob = await response.blob();
+                finalUrl = URL.createObjectURL(blob);
+            }
+            else if (host === 'pollinations_raw') {
                 statusTxt.innerText = "Bypassing Gateway Filters...";
-                // تعديل المعاملات: إضافة &safe=false وتثبيت enhance=false
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&cache=false`;
             } 
             else if (host === 'nol_ultra') {
                 statusTxt.innerText = "Executing ULTRA RAW Bypass...";
-                // تكتيك المحرك السابع: وصف المناطق بوضوح لمنع التشويه
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered, no blur effects" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false`;
             }
             else if (host === 'ghost') {
@@ -280,13 +326,15 @@
                     `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
             }
 
-            await new Promise((resolve, reject) => {
-                const temp = new Image();
-                temp.crossOrigin = "anonymous";
-                temp.src = finalUrl;
-                temp.onload = resolve;
-                temp.onerror = reject;
-            });
+            if (host !== 'merart_sovereign' && host !== 'ghost') {
+                await new Promise((resolve, reject) => {
+                    const temp = new Image();
+                    temp.crossOrigin = "anonymous";
+                    temp.src = finalUrl;
+                    temp.onload = resolve;
+                    temp.onerror = reject;
+                });
+            }
 
             clearInterval(interval);
             progressBar.style.width = '100%';
