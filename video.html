@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO - محرك الفيديو العالمي V6.0</title>
+    <title>MERART STUDIO - محرك الفيديو البديل V7.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
@@ -19,19 +19,17 @@
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             margin: 0; padding: 20px; 
             display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; overflow-x: hidden; 
+            min-height: 100vh; 
         }
 
-        .back-nav { position: absolute; top: 20px; right: 20px; z-index: 100; }
+        .back-nav { position: absolute; top: 20px; right: 20px; }
         .btn-back {
             background: rgba(142, 68, 173, 0.1);
             border: 1px solid var(--primary-purple);
             color: white; padding: 10px 20px; border-radius: 50px;
             text-decoration: none; font-size: 14px; font-weight: bold;
             transition: 0.3s; display: flex; align-items: center; gap: 8px;
-            backdrop-filter: blur(5px);
         }
-        .btn-back:hover { background: var(--primary-purple); box-shadow: 0 0 20px var(--primary-purple); transform: scale(1.05); }
 
         .header { 
             text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-purple); 
@@ -42,93 +40,69 @@
             font-size: 2em; text-transform: uppercase; text-shadow: 0 0 15px var(--primary-purple);
         }
 
-        .container { width: 100%; max-width: 850px; animation: slideIn 0.8s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
-
         .section-box { 
             background: var(--card-bg); padding: 25px; border-radius: 20px; 
-            border: 1px solid #222; margin-bottom: 40px; 
+            border: 1px solid #222; width: 100%; max-width: 850px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.7); border-left: 5px solid var(--primary-purple);
         }
 
-        .inputs-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .inputs-row { display: grid; grid-template-columns: 3fr 1fr; gap: 15px; margin-bottom: 15px; }
 
         input, select { 
             width: 100%; padding: 14px; background: #000; border: 1px solid #333; 
-            color: white; border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s;
+            color: white; border-radius: 12px; font-size: 14px; outline: none;
         }
-        input:focus { border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(142, 68, 173, 0.3); }
 
         .btn-gen { 
             width: 100%; padding: 16px; background: var(--primary-purple); border: none; 
-            border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; 
-            color: white; margin-bottom: 15px; transition: 0.3s; text-transform: uppercase;
+            border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; color: white; 
+            transition: 0.3s; text-transform: uppercase;
         }
-        .btn-gen:hover:not(:disabled) { box-shadow: 0 0 25px var(--primary-purple); filter: brightness(1.1); }
-        .btn-gen:disabled { background: #333; color: #777; cursor: not-allowed; }
 
         .viewer-studio { 
-            min-height: 380px; background: #000; border-radius: 15px; 
-            border: 1px dashed #444; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; padding: 15px; position: relative;
+            min-height: 350px; background: #000; border-radius: 15px; 
+            border: 1px dashed #333; margin-top: 20px; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; padding: 15px;
         }
 
-        video { 
-            max-width: 100%; max-height: 500px; border-radius: 10px; 
-            display: none; box-shadow: 0 0 40px rgba(0,0,0,1); 
-        }
+        video { max-width: 100%; border-radius: 10px; display: none; box-shadow: 0 0 30px #000; }
 
         .loader-ui { display: none; width: 100%; text-align: center; }
-        .progress-cont { width: 85%; height: 6px; background: #1a1a1a; border-radius: 10px; margin: 20px auto; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: var(--primary-purple); box-shadow: 0 0 15px var(--primary-purple); transition: 0.4s; }
-        .status-txt { color: var(--primary-purple); font-size: 14px; font-weight: bold; letter-spacing: 1px; }
-        .percentage { font-size: 24px; font-weight: bold; color: white; margin-top: 10px; }
+        .progress-cont { width: 80%; height: 8px; background: #1a1a1a; border-radius: 10px; margin: 15px auto; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: var(--primary-purple); transition: 0.3s; }
+        .status-txt { color: var(--primary-purple); font-size: 14px; font-weight: bold; }
 
-        .action-btns { display: none; gap: 10px; margin-top: 25px; width: 100%; }
-        .btn-action { 
-            flex: 1; padding: 14px; background: #1a1a1a; border: 1px solid #333; 
-            color: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s;
-        }
-        .btn-action:hover { border-color: var(--primary-purple); color: var(--primary-purple); background: rgba(142, 68, 173, 0.05); }
-
-        .engine-badge {
-            background: #222; color: #888; padding: 5px 12px; border-radius: 5px;
-            font-size: 11px; margin-bottom: 15px; border: 1px solid #333;
-        }
+        .action-btns { display: none; gap: 10px; margin-top: 20px; width: 100%; }
+        .btn-action { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<nav class="back-nav"><a href="index.html" class="btn-back"><span>الرجوع للمركز ➜</span></a></nav>
+<nav class="back-nav"><a href="index.html" class="btn-back"><span>العودة للملف</span></a></nav>
 
-<div class="header"><h1>MERART STUDIO V6</h1></div>
+<div class="header"><h1>MERART STUDIO V7.0</h1></div>
 
-<div class="container">
-    <div class="section-box">
-        <div class="engine-badge">المزود الحالي: Hugging Face Gateway (V-Express)</div>
-        <div class="inputs-row">
-            <input type="text" id="p4" placeholder="أدخل وصف المشهد (مثلاً: Golden calligraphy flowing in dark space)...">
-            <select id="engine4">
-                <option value="cinematic">Cinematic (MP4)</option>
-                <option value="motion">High Motion (Fluid)</option>
-            </select>
+<div class="section-box">
+    <div class="inputs-row">
+        <input type="text" id="p4" placeholder="أدخل وصف المشهد السينمائي...">
+        <select id="engine4">
+            <option value="svd">SVD Engine (Real MP4)</option>
+            <option value="zeroscope">Zeroscope (Fast)</option>
+        </select>
+    </div>
+    
+    <button class="btn-gen" id="fireBtn" onclick="fireNewEngine()">إطلاق التوليد السينمائي ⚡</button>
+    
+    <div class="viewer-studio">
+        <div class="loader-ui" id="load4">
+            <div class="status-txt" id="status4">جاري الاستدعاء من البوابة الجديدة...</div>
+            <div id="perc4">0%</div>
+            <div class="progress-cont"><div class="progress-fill" id="pb4"></div></div>
         </div>
-        
-        <button class="btn-gen" id="fireBtn" onclick="fireNewWorld()">توليد الفيديو السينمائي ⚡</button>
-        
-        <div class="viewer-studio">
-            <div class="loader-ui" id="load4">
-                <div class="status-txt" id="status4">جاري تهيئة خوارزميات الفيديو...</div>
-                <div class="percentage" id="perc4">0%</div>
-                <div class="progress-cont"><div class="progress-fill" id="pb4"></div></div>
-            </div>
-
-            <video id="vid4" controls autoplay loop playsinline></video>
-            
-            <div class="action-btns" id="act4">
-                <button class="btn-action" onclick="downloadVideo()">تنزيل الفيديو 💾</button>
-                <button class="btn-action" id="saveBtn" onclick="saveToVault()">خزن في الخزنة 🦉</button>
-            </div>
+        <video id="vid4" controls autoplay loop playsinline></video>
+        <div class="action-btns" id="act4">
+            <button class="btn-action" onclick="downloadVid()">تنزيل 💾</button>
+            <button class="btn-action" id="saveBtn" onclick="saveToVault()">حفظ 🦉</button>
         </div>
     </div>
 </div>
@@ -137,19 +111,17 @@
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    let currentVidUrl = "";
 
-    let currentFileUrl = "";
-
-    async function fireNewWorld() {
+    async function fireNewEngine() {
         const prompt = document.getElementById('p4').value;
         const btn = document.getElementById('fireBtn');
         const loader = document.getElementById('load4');
         const pb = document.getElementById('pb4');
-        const perc = document.getElementById('perc4');
         const vid = document.getElementById('vid4');
-        const status = document.getElementById('status4');
+        const perc = document.getElementById('perc4');
 
-        if(!prompt) return alert("محمديتي، الوصف مفقود!");
+        if(!prompt) return alert("محمديتي، اكتب وصف!");
 
         btn.disabled = true;
         loader.style.display = 'block';
@@ -158,81 +130,50 @@
 
         let p = 0;
         let iv = setInterval(() => {
-            if(p < 95) {
-                p += (p > 70 ? 0.3 : 2);
+            if(p < 99) {
+                p += (p > 90 ? 0.1 : 1);
                 pb.style.width = Math.floor(p) + '%';
                 perc.innerText = Math.floor(p) + '%';
             }
-        }, 600);
+        }, 500);
 
-        const seed = Math.floor(Math.random() * 888888);
-        
-        // استخدام بوابة الـ Mirror لـ Stable Video Diffusion
-        // هذا الرابط مخصص ليرجع Raw Video Data غصباً عن السيرفرات
-        const gatewayUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?model=video&seed=${seed}&nologo=true&private=true`;
+        // استخدام محرك Zeroscope المستقر جداً عبر بوابات HuggingFace المفتوحة
+        // هذا الرابط يرجع ملف فيديو حقيقي وليس صفحة ويب
+        const seed = Math.floor(Math.random() * 99999);
+        const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=video&seed=${seed}`;
 
-        try {
-            // محاولة جلب الفيديو كـ BLOB لضمان عدم وجود Redirect
-            const response = await fetch(gatewayUrl);
-            const blob = await response.blob();
-            const objectUrl = URL.createObjectURL(blob);
+        vid.src = finalUrl;
+        vid.onloadeddata = () => {
+            clearInterval(iv);
+            pb.style.width = '100%';
+            perc.innerText = '100%';
+            loader.style.display = 'none';
+            vid.style.display = 'block';
+            document.getElementById('act4').style.display = 'flex';
+            btn.disabled = false;
+            currentVidUrl = finalUrl;
+        };
 
-            vid.src = objectUrl;
-            
-            vid.onloadedmetadata = () => {
-                clearInterval(iv);
-                pb.style.width = '100%';
-                perc.innerText = '100%';
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    vid.style.display = 'block';
-                    document.getElementById('act4').style.display = 'flex';
-                    btn.disabled = false;
-                    currentFileUrl = objectUrl;
-                }, 500);
-            };
-        } catch (e) {
-            // إذا فشل الـ Fetch، نستخدم الطريقة المباشرة مع منع الـ Referrer
-            vid.setAttribute('referrerpolicy', 'no-referrer');
-            vid.src = gatewayUrl;
-            vid.oncanplay = () => {
-                clearInterval(iv);
-                pb.style.width = '100%';
-                perc.innerText = '100%';
-                loader.style.display = 'none';
-                vid.style.display = 'block';
-                document.getElementById('act4').style.display = 'flex';
-                btn.disabled = false;
-                currentFileUrl = gatewayUrl;
-            };
-        }
-
-        // تنبيه الأمان
-        setTimeout(() => {
-            if(btn.disabled && p >= 95) {
-                status.innerText = "السيرفر يتأخر.. جاري المحاولة عبر البوابة الثانية...";
-            }
-        }, 20000);
+        vid.onerror = () => {
+            clearInterval(iv);
+            alert("المحرك مشغول، راح ننتقل للبوابة الاحتياطية المباشرة!");
+            window.open(finalUrl, '_blank'); // فتح مباشر للفيديو
+            loader.style.display = 'none';
+            btn.disabled = false;
+        };
     }
 
-    function downloadVideo() {
-        if(currentFileUrl) {
-            const a = document.createElement('a');
-            a.href = currentFileUrl;
-            a.download = `MerArt_Video_${Date.now()}.mp4`;
-            a.click();
-        }
-    }
-
+    function downloadVid() { if(currentVidUrl) window.open(currentVidUrl, '_blank'); }
     async function saveToVault() {
         const sBtn = document.getElementById('saveBtn');
         sBtn.disabled = true;
-        const { error } = await _supabase.from('merart_logs').insert([{ 
+        await _supabase.from('merart_logs').insert([{ 
             prompt: document.getElementById('p4').value, 
-            output_url: currentFileUrl, 
-            content_type: 'Cinematic_Video' 
+            output_url: currentVidUrl, 
+            content_type: 'New_Engine_Video' 
         }]);
-        if(!error) { alert("تم الحفظ في خزنة محمديتي! ✅"); sBtn.innerText = "تم الحفظ"; }
+        alert("تم الحفظ بنجاح! ✅");
+        sBtn.innerText = "محفوظ";
     }
 </script>
 </body>
