@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.8.0 - نسخة اللوراز</title>
+    <title>MERART STUDIO V7.9.0 - نسخة الهيبة والتحكم</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
@@ -45,7 +45,6 @@
         .btn-action:hover { border-color: var(--primary-green); color: var(--primary-green); }
         .ref-box { border: 1px solid #2ecc7133; padding: 10px; border-radius: 10px; margin-bottom: 10px; background: #1a2e2122; }
         
-        /* ستايل قائمة اللورا الجديدة */
         .lora-row { margin-bottom: 15px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
         .lora-label { color: #888; font-size: 12px; font-weight: bold; }
     </style>
@@ -59,13 +58,13 @@
 </div>
 
 <div class="header">
-    <h1>MERART STUDIO V7.8.0</h1>
+    <h1>MERART STUDIO V7.9.0</h1>
     <a href="video.html" target="_blank" class="btn-cinema">السينما 🎬</a>
 </div>
 
 <div class="container" id="main-studio">
     <div class="section-box">
-        <span class="section-title">1. التوليد المباشر (Extreme Realism & LoRA Control)</span>
+        <span class="section-title">1. التوليد الاحترافي (LoRA & Visual Reference)</span>
         <div class="inputs-row" style="grid-template-columns: 1fr 1fr 1fr;">
             <select id="host-select" onchange="updateModels()">
                 <option value="pollinations">Pollinations (Flux Pro & More)</option>
@@ -86,18 +85,18 @@
 
         <div class="lora-row">
             <select id="lora-select">
-                <option value="">-- مخزن الملامح (LoRA Vault) - اختيار الملامح --</option>
-                <option value="flux-realism">واقعية فائقة (High Realism Skin)</option>
-                <option value="oriental-beauty">ملامح شرقية / عربية (Oriental Essence)</option>
-                <option value="nordic-face">ملامح شمالية / أوروبية (Nordic Beauty)</option>
-                <option value="cinematic-portrait">بورتريه سينمائي (Cinematic Detail)</option>
-                <option value="sculpture-physique">تفاصيل جسدية منحوتة (Athletic Build)</option>
+                <option value="">-- اختيار الملامح والستايل (LoRA Vault) --</option>
+                <option value="extreme-realism">واقعية سينمائية فائقة (Ultra Realism)</option>
+                <option value="historical-dignity">وقار تاريخي / ملامح الأئمة (Historical Dignity)</option>
+                <option value="oriental-spirit">روح الشرق / ملامح عربية (Oriental Spirit)</option>
+                <option value="ancient-manuscript">ستايل المخطوطات القديمة (Manuscript Art)</option>
+                <option value="glowing-aura">نورانية وهيبة (Divine Aura Style)</option>
             </select>
             <span class="lora-label">ACTIVE LoRA</span>
         </div>
 
         <div class="ref-box">
-            <input type="text" id="ref1" placeholder="أدخل رابط صورة الملامح من بنترست (إختياري - ControlNet)...">
+            <input type="text" id="ref1" placeholder="أدخل رابط صورة المرجع (لإجبار المحرك على تقليد الملامح)...">
         </div>
         <textarea id="p1" rows="2" placeholder="أدخل وصف الصورة..."></textarea>
         <button class="btn-gen" onclick="fire('text')">استدعاء قوة المحرك ✨</button>
@@ -116,7 +115,7 @@
     </div>
 
     <div class="section-box">
-        <span class="section-title">2. التوليد القائم على صورة (Image to Image)</span>
+        <span class="section-title">2. التعديل القائم على صورة (Image to Image)</span>
         <div class="inputs-row">
             <input type="text" id="u2" placeholder="رابط الصورة المصدر (Direct URL)...">
             <select id="m2">
@@ -175,18 +174,16 @@
         }
     }
 
-    const CLOUDFLARE_ENDPOINT = "https://x.nol-30c.workers.dev/";
     const SB_URL = 'https://ctvmxkwzzqwskgtgcuwc.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
-    const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
+    const qualityBoost = ", masterpiece, ultra-detailed 8k, photorealistic, cinematic lighting, sharp focus, intricate textures, divine atmosphere";
     
     const MERART_ASSETS = {
-        "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
-        "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
-        "imam": "https://img.wattpad.com/userbg/iooooi17.16430.jpg , https://pbs.twimg.com/profile_images/2013356643971395584/wh7Ip0Xf.jpg",
-        "zulfiqar": "https://i0.wp.com/rajputanaarts.com/wp-content/uploads/2025/10/1000976504-scaled.jpg?fit=700%2C290&ssl=1 , https://mktraders.com.pk/wp-content/uploads/2025/02/mktraders-94.jpg"
+        "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg",
+        "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG",
+        "imam": "https://pbs.twimg.com/profile_images/2013356643971395584/wh7Ip0Xf.jpg"
     };
 
     let storedUrls = {};
@@ -196,18 +193,16 @@
             {v: "flux-pro", n: "Flux.1 [pro] (الرتبة العليا)"},
             {v: "flux", n: "Flux Professional (Base)"},
             {v: "flux-realism", n: "Flux Realism (Extreme Skin)"},
-            {v: "pablita", n: "Pablita Art Style"},
-            {v: "flux-anime", n: "Flux Anime Style"}
+            {v: "pablita", n: "Pablita Art Style"}
         ],
         huggingface: [
             {v: "black-forest-labs/FLUX.1-dev", n: "Flux Dev (التحكم المطلق)"},
-            {v: "stablediffusionapi/juggernaut-xl-v9", n: "Juggernaut XL (ملك الواقعية)"},
             {v: "SG161222/RealVisXL_V4.0", n: "RealVisXL (الواقعية القصوى)"}
         ],
-        nol: [ {v: "flux", n: "Flux RAW (الخام المباشر)"} ],
-        ghost: [ {v: "@cf/leonardo/phoenix-1.0", n: "GHOST: Leonardo Phoenix"} ],
-        pollinations_raw: [ {v: "flux-realism", n: "RAW: Flux Skin Realism"} ],
-        nol_ultra: [ {v: "flux", n: "ULTRA: Flux RAW Bypass"} ]
+        nol: [ {v: "flux", n: "Flux RAW"} ],
+        ghost: [ {v: "@cf/leonardo/phoenix-1.0", n: "GHOST: Leonardo"} ],
+        pollinations_raw: [ {v: "flux-realism", n: "RAW: Flux Realism"} ],
+        nol_ultra: [ {v: "flux", n: "ULTRA: RAW Bypass"} ]
     };
 
     function updateModels() {
@@ -224,22 +219,20 @@
     function injectReference(prompt) {
         let p = prompt.toLowerCase();
         let ref = "";
-        let found = false;
-        if (p.includes("najaf") || p.includes("علي")) { ref += MERART_ASSETS["najaf"] + " , "; found = true; }
-        if (p.includes("karbala") || p.includes("حسين")) { ref += MERART_ASSETS["karbala"] + " , "; found = true; }
-        return { final: ref + prompt, refs: ref, injected: found };
+        if (p.includes("najaf") || p.includes("علي")) { ref += MERART_ASSETS["najaf"] + " , "; }
+        if (p.includes("karbala") || p.includes("حسين")) { ref += MERART_ASSETS["karbala"] + " , "; }
+        return { final: ref + prompt };
     }
 
     updateModels();
 
     async function fire(type) {
-        let id = (type==='text')?1:(type==='i2i')?2:3;
+        let id = (type==='text')?1:2;
         const loader = document.getElementById(`load${id}`);
         const progressBar = document.getElementById(`pb${id}`);
         const percTxt = document.getElementById(`perc${id}`);
         const img = document.getElementById(`img${id}`);
         const actions = document.getElementById(`act${id}`);
-        const statusTxt = document.getElementById(`status${id}`);
         
         img.style.display = 'none'; actions.style.display = 'none';
         loader.style.display = 'block';
@@ -250,21 +243,16 @@
         let [w, h] = size.split('x');
         let rawPrompt = (id===1)?document.getElementById('p1').value:document.getElementById('p2').value;
         
-        // جلب اللورا المختارة وحقنها
         let loraValue = document.getElementById('lora-select').value;
-        let loraPrompt = loraValue ? `using LoRA ${loraValue} style for extreme facial features and accuracy, ` : "";
+        let loraText = loraValue ? `implemented with LoRA style ${loraValue} for specific facial features, ` : "";
 
         let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
         let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt };
-        let smartPrompt = loraPrompt + injection.final;
-
-        if(refUrl !== "") { smartPrompt = `${refUrl} , face reference , ${smartPrompt}`; }
-
-        const bypassCode = ", (unfiltered:1.6), raw anatomy, high-res textures, full detail, hyper-realism";
+        let smartPrompt = loraText + injection.final;
 
         let progress = 0;
         let interval = setInterval(() => {
-            if (progress < 96) {
+            if (progress < 95) {
                 progress += Math.floor(Math.random() * 5) + 1;
                 progressBar.style.width = progress + '%';
                 percTxt.innerText = progress + '%';
@@ -274,12 +262,17 @@
         try {
             let finalUrl = "";
             const seed = Math.floor(Math.random()*99999999);
+            const base = `https://image.pollinations.ai/prompt/`;
+            const params = `?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
             
-            if (host.includes('raw') || host.includes('ultra')) {
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&safe=false`;
+            // بروتوكول الحقن البصري (IP-Adapter Logic)
+            if(refUrl !== "") {
+                finalUrl = `${base}${encodeURIComponent(smartPrompt + qualityBoost)}${params}&refer=${encodeURIComponent(refUrl)}&enhance=true`;
             } else {
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true`;
+                finalUrl = `${base}${encodeURIComponent(smartPrompt + qualityBoost)}${params}`;
             }
+
+            if (host.includes('raw') || host.includes('ultra')) finalUrl += "&safe=false";
 
             await new Promise((resolve, reject) => {
                 const temp = new Image();
@@ -302,16 +295,7 @@
 
     async function dl(id) {
         const imageUrl = storedUrls[id].url;
-        const fileName = `MERART_STUDIO_${Date.now()}.png`;
-        try {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = fileName;
-            document.body.appendChild(a); a.click();
-            window.URL.revokeObjectURL(url); document.body.removeChild(a);
-        } catch (err) { window.open(imageUrl, '_blank'); }
+        window.open(imageUrl, '_blank');
     }
 
     async function save(id) {
@@ -319,7 +303,7 @@
         try {
             await _supabase.from('merart_logs').insert([{ prompt: data.prompt, output_url: data.url, content_type: 'Image', model_used: data.model }]);
             alert("تم الحفظ بنجاح! ✅");
-        } catch (err) { alert("فشل الحفظ!"); }
+        } catch (err) { alert("فشل الحفظ في سوبابيس!"); }
     }
 </script>
 </body>
