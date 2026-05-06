@@ -3,26 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERART STUDIO V7.7.7 - نسخة السيادة المحدثة</title>
+    <title>MERART STUDIO V7.7.2 - نسخة السيادة المحدثة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary-green: #2ecc71; --dark-bg: #050505; --card-bg: #111; --text: #e0e0e0; }
         body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* ستايلات البوابة النيونية (تعديل الثبات) */
+        /* ستايلات البوابة النيونية */
         #vault-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        
-        /* الحلقة اللي تفتر */
         #vault-ring { width: 450px; height: 450px; border: 4px dashed rgba(46, 204, 113, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; transition: 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); box-shadow: 0 0 30px rgba(46, 204, 113, 0.1); }
-        
-        /* المستطيل الثابت - فصلناه عن دوران الحلقة */
-        #access-box { 
-            position: absolute; /* حتى لا يتأثر بدوران الأب */
-            left: 50%; top: 50%;
-            transform: translate(-50%, -50%) scale(0); 
-            text-align: center; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.3); z-index: 100; opacity: 0; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        
+        #access-box { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0); text-align: center; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.3); z-index: 100; opacity: 0; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #vault-status { color: #2ecc71; font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; text-shadow: 0 0 10px #2ecc71; }
         #access-key { width: 140px; background: transparent; border: none; border-bottom: 3px solid #2ecc71; color: #2ecc71; text-align: center; font-size: 28px; letter-spacing: 8px; outline: none; text-shadow: 0 0 15px #2ecc71; }
         
@@ -31,21 +21,14 @@
         @keyframes neonErrorPulse { 0%, 100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.4); } 50% { box-shadow: 0 0 50px rgba(231, 76, 60, 0.8); } }
         @keyframes vaultShake { 0%, 100% { transform: translate(-50%, -50%) translateX(0); } 20% { transform: translate(-50%, -50%) translateX(-15px); } 40% { transform: translate(-50%, -50%) translateX(15px); } 60% { transform: translate(-50%, -50%) translateX(-10px); } 80% { transform: translate(-50%, -50%) translateX(10px); } }
         
-        /* الحالة النشطة: الحلقة تفتر والمستطيل يثبت */
         .access-active #vault-ring { animation: gearSpin 15s linear infinite, neonPulse 2s infinite; }
         .access-active #access-box { transform: translate(-50%, -50%) scale(1) !important; opacity: 1 !important; }
-        
-        /* حالة الخطأ: اهتزاز المستطيل وتوهج أحمر */
         .wrong-key #access-box { animation: vaultShake 0.3s ease-in-out; border-color: #e74c3c !important; box-shadow: 0 0 20px rgba(231, 76, 60, 0.6) !important; }
         .wrong-key #vault-ring { border-color: #e74c3c !important; animation: gearSpin 2s linear infinite, neonErrorPulse 0.5s infinite !important; }
-
         .unlocked #vault-ring { transform: scale(10) rotate(720deg) !important; opacity: 0 !important; filter: blur(20px); pointer-events: none; }
 
-        /* ستايلات الستوديو الأصلية */
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-green); width: 100%; max-width: 900px; padding: 10px; position: relative; }
         .header h1 { color: var(--primary-green); letter-spacing: 10px; margin: 0; font-size: 2.2em; text-transform: uppercase; }
-        
-        /* ستايل زر الانتقال الجديد */
         .btn-cinema { position: absolute; left: 10px; top: 15px; padding: 8px 15px; background: transparent; border: 1px solid var(--primary-green); color: var(--primary-green); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.3s; text-decoration: none; }
         .btn-cinema:hover { background: var(--primary-green); color: black; box-shadow: 0 0 15px var(--primary-green); }
 
@@ -78,7 +61,7 @@
 </div>
 
 <div class="header">
-    <h1>MERART STUDIO V7.7.7</h1>
+    <h1>MERART STUDIO V7.7.2</h1>
     <a href="video.html" target="_blank" class="btn-cinema">السينما 🎬</a>
 </div>
 
@@ -177,11 +160,7 @@
     window.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('vault-overlay');
         const accessKeyInput = document.getElementById('access-key');
-        
-        setTimeout(() => { 
-            overlay.classList.add('access-active'); 
-        }, 500); 
-
+        setTimeout(() => { overlay.classList.add('access-active'); }, 500); 
         accessKeyInput.addEventListener('input', function(e) {
             if(this.value.length === 4) { validateVault(this.value); }
         });
@@ -197,7 +176,6 @@
             status.innerText = "ACCESS GRANTED - LOGGING IN...";
             status.style.color = "#2ecc71";
             ring.style.animation = "gearSpin 0.5s linear infinite";
-            
             setTimeout(() => {
                 overlay.classList.add('unlocked');
                 overlay.style.backgroundColor = "transparent";
@@ -211,7 +189,6 @@
             status.innerText = "ACCESS DENIED - INVALID CODE";
             status.style.color = "#e74c3c";
             overlay.classList.add('wrong-key');
-            
             setTimeout(() => {
                 overlay.classList.remove('wrong-key');
                 document.getElementById('access-key').value = '';
@@ -226,18 +203,16 @@
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dm14a3d6enF3c2tndGdjdXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjE1MDksImV4cCI6MjA5MTczNzUwOX0.UrdE2w4gg-P9Hfy1b4uB34FES-CwQy0fs4LEF-TnagI';
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     
-    const qualityBoost = ", highly detailed, 8k resolution, raw photo, f/1.4 lens, cinematic lighting, sharp focus, hyper-realistic skin texture, intricate details, masterpiece";
-    const negPrompt = ", (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, cartoon, anime, illustration, painting, drawing";
-    
+    const qualityBoost = ", highly detailed, 8k resolution, raw photo, cinematic lighting, sharp focus, hyper-realistic, masterpiece";
     const MERART_ASSETS = {
-        "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg , https://almerja.com/ph/img/mid/1773047136-2583.jpg",
-        "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG , https://alkafeel.net/photos/imager/avif/06315e8f6b8dc428b1f8053d.jpg/NjUw",
-        "imam": "https://img.wattpad.com/userbg/iooooi17.16430.jpg , https://pbs.twimg.com/profile_images/2013356643971395584/wh7Ip0Xf.jpg",
-        "zulfiqar": "https://i0.wp.com/rajputanaarts.com/wp-content/uploads/2025/10/1000976504-scaled.jpg?fit=700%2C290&ssl=1 , https://mktraders.com.pk/wp-content/uploads/2025/02/mktraders-94.jpg"
+        "najaf": "https://media.alalam.ir/uploads/855x495/2020/10/16/160287561030293200.jpg",
+        "karbala": "https://alkafeel.net/news/images/main/5d47d8919810bbab92c40fe636a32ec1.JPG",
+        "imam": "https://img.wattpad.com/userbg/iooooi17.16430.jpg",
+        "zulfiqar": "https://i0.wp.com/rajputanaarts.com/wp-content/uploads/2025/10/1000976504-scaled.jpg"
     };
 
     let storedUrls = {};
-    let activeControllers = {}; // تخزين وحدات التحكم لكل قسم
+    let activeControllers = {};
 
     const hostData = {
         pollinations: [
@@ -252,39 +227,28 @@
         huggingface: [
             {v: "black-forest-labs/FLUX.1-dev", n: "Flux Dev (التحكم المطلق)"},
             {v: "stablediffusionapi/juggernaut-xl-v9", n: "Juggernaut XL (ملك الواقعية)"},
-            {v: "AlbedoBase/AlbedoBase-XL", n: "AlbedoBase (التوازن الفني)"},
             {v: "SG161222/RealVisXL_V4.0", n: "RealVisXL (الواقعية القصوى)"},
             {v: "dataautics/realistic-vision-v6.0", n: "Realistic Vision (الهوية الحقيقية)"},
-            {v: "stabilityai/stable-diffusion-xl-base-1.0", n: "SDXL Base (التدقيق التاريخي)"},
-            {v: "cagliostrolab/animagine-xl-3.1", n: "Illustrious / Animagine XL"},
-            {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Diffusion V6 XL"}
+            {v: "cagliostrolab/animagine-xl-3.1", n: "Illustrious / Animagine XL"}
         ],
         prodia: [
             {v: "realistic-vision-v6", n: "Realistic Vision V6 (Civitai)"},
-            {v: "dreamshaper-xl", n: "DreamShaper XL"},
-            {v: "absolute-reality", n: "Absolute Reality"}
+            {v: "dreamshaper-xl", n: "DreamShaper XL"}
         ],
         nol: [
             {v: "flux", n: "Flux RAW (الخام المباشر)"},
-            {v: "stablediffusionapi/epicrealism-xl", n: "Realism Engine V5 (Civitai)"},
-            {v: "stablediffusionapi/juggernaut-aftermath", n: "Juggernaut Aftermath (Raw)"},
-            {v: "astraliteheart/pony-diffusion-v6-xl", n: "Pony Realism v2 (Uncensored)"}
+            {v: "stablediffusionapi/epicrealism-xl", n: "Realism Engine V5 (Civitai)"}
         ],
         ghost: [
             {v: "@cf/leonardo/phoenix-1.0", n: "GHOST: Leonardo Phoenix (نيرونات 🔥)"},
-            {v: "@cf/leonardo/lucid-origin", n: "GHOST: Leonardo Lucid"},
-            {v: "@cf/bytedance/stable-diffusion-xl-lightning", n: "GHOST: XL Lightning"},
-            {v: "@cf/lykon/dreamshaper-8-lcm", n: "GHOST: DreamShaper 8"},
-            {v: "@cf/stabilityai/stable-diffusion-xl-base-1.0", n: "GHOST: SDXL Pro"}
+            {v: "@cf/bytedance/stable-diffusion-xl-lightning", n: "GHOST: XL Lightning"}
         ],
         pollinations_raw: [
             {v: "flux-realism", n: "RAW: Flux Skin Realism"},
-            {v: "flux", n: "RAW: Flux Unfiltered"},
-            {v: "any-dark", n: "RAW: Dark Cinematic"}
+            {v: "flux", n: "RAW: Flux Unfiltered"}
         ],
         nol_ultra: [
-            {v: "flux", n: "ULTRA: Flux RAW Bypass"},
-            {v: "astraliteheart/pony-diffusion-v6-xl", n: "ULTRA: Pony Realism Uncensored"}
+            {v: "flux", n: "ULTRA: Flux RAW Bypass"}
         ]
     };
 
@@ -302,12 +266,9 @@
     function injectReference(prompt) {
         let p = prompt.toLowerCase();
         let ref = "";
-        let found = false;
-        if (p.includes("najaf") || p.includes("نجف") || p.includes("ali") || p.includes("علي")) { ref += MERART_ASSETS["najaf"] + " , "; found = true; }
-        if (p.includes("karbala") || p.includes("كربلاء") || p.includes("hussain") || p.includes("حسين") || p.includes("abbas") || p.includes("عباس")) { ref += MERART_ASSETS["karbala"] + " , "; found = true; }
-        if (p.includes("imam") || p.includes("إمام")) { ref += MERART_ASSETS["imam"] + " , "; found = true; }
-        if (p.includes("zulfiqar") || p.includes("ذو الفقار") || p.includes("sword") || p.includes("سيف")) { ref += MERART_ASSETS["zulfiqar"] + " , "; found = true; }
-        return { final: ref + prompt, refs: ref, injected: found };
+        if (p.includes("najaf") || p.includes("ali")) ref += MERART_ASSETS["najaf"] + " , ";
+        if (p.includes("karbala") || p.includes("hussain")) ref += MERART_ASSETS["karbala"] + " , ";
+        return { final: ref + prompt };
     }
 
     updateModels();
@@ -315,7 +276,7 @@
     async function fire(type) {
         let id = (type==='text')?1:(type==='i2i')?2:3;
         
-        // إلغاء أي طلب سابق لهذا الـ id لمنع التضارب
+        // إلغاء الطلب السابق
         if (activeControllers[id]) { activeControllers[id].abort(); }
         activeControllers[id] = new AbortController();
 
@@ -326,9 +287,9 @@
         const actions = document.getElementById(`act${id}`);
         const statusTxt = document.getElementById(`status${id}`);
         
-        // تصفير الواجهة قبل البدء الجديد
+        // تصفير وتنظيف الواجهة فوراً
         img.style.display = 'none'; 
-        img.src = ''; // مسح الصورة القديمة فوراً
+        img.removeAttribute('src'); // حذف السورس لقطع الذاكرة
         actions.style.display = 'none';
         loader.style.display = 'block';
         progressBar.style.width = '0%';
@@ -341,14 +302,12 @@
         let rawPrompt = (id===1)?document.getElementById('p1').value:(id===2)?document.getElementById('p2').value:document.getElementById('sty3').value;
         
         let refUrl = (id===1) ? document.getElementById('ref1').value.trim() : "";
-        let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt, refs: "", injected: false };
+        let injection = (id===1) ? injectReference(rawPrompt) : { final: rawPrompt };
         let smartPrompt = injection.final;
 
-        if(refUrl !== "") {
-            smartPrompt = `${refUrl} , strictly follow the facial features and structure of this reference image , ${smartPrompt}`;
-        }
+        if(refUrl !== "") smartPrompt = `${refUrl} , face match , ${smartPrompt}`;
 
-        const bypassCode = ", (unfiltered:1.6), raw anatomy, no censorship, high-res textures, full detail, hyper-realism, non-blurred, (explicit detail:1.2)";
+        const bypassCode = ", (unfiltered:1.6), no censorship, explicit textures";
 
         let progress = 0;
         let interval = setInterval(() => {
@@ -360,18 +319,14 @@
         }, 300);
 
         try {
+            // التعديل الجوهري: Seed عشوائي جداً مع Timestamp لضمان صورة جديدة
+            const forceNewSeed = Math.floor(Math.random() * 1000000000);
+            const cacheBuster = Date.now();
             let finalUrl = "";
-            const seed = Math.floor(Math.random()*99999999);
-            const ts = Date.now(); // طابع زمني لكسر التخزين
 
-            if (host === 'pollinations_raw') {
-                if(statusTxt) statusTxt.innerText = "Bypassing Gateway Filters...";
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&cache=false&t=${ts}`;
+            if (host === 'pollinations_raw' || host === 'nol_ultra') {
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${forceNewSeed}&model=${model}&nologo=true&safe=false&t=${cacheBuster}`;
             } 
-            else if (host === 'nol_ultra') {
-                if(statusTxt) statusTxt.innerText = "Executing ULTRA RAW Bypass...";
-                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + ", perfectly rendered, no blur effects" + bypassCode)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&enhance=false&safe=false&t=${ts}`;
-            }
             else if (host === 'ghost') {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
                     method: 'POST',
@@ -383,20 +338,21 @@
                 finalUrl = URL.createObjectURL(imageBlob);
             }
             else {
-                finalUrl = (host === 'nol') ? 
-                    `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=false&t=${ts}` :
-                    `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${seed}&model=${model}&nologo=true&t=${ts}`;
+                finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${forceNewSeed}&model=${model}&nologo=true&t=${cacheBuster}`;
             }
 
-            await new Promise((resolve, reject) => {
-                const temp = new Image();
-                temp.crossOrigin = "anonymous";
-                temp.src = finalUrl;
-                temp.onload = resolve;
-                temp.onerror = reject;
-                // ربط رفض الوعد بإلغاء الـ Controller
-                activeControllers[id].signal.addEventListener('abort', () => reject(new Error('Request Aborted')));
+            // تحميل الصورة في الذاكرة أولاً قبل عرضها
+            const imgLoader = new Image();
+            imgLoader.crossOrigin = "anonymous";
+            
+            const loadPromise = new Promise((resolve, reject) => {
+                imgLoader.onload = resolve;
+                imgLoader.onerror = reject;
+                activeControllers[id].signal.addEventListener('abort', () => reject(new Error('Aborted')));
             });
+
+            imgLoader.src = finalUrl;
+            await loadPromise;
 
             clearInterval(interval);
             progressBar.style.width = '100%';
@@ -409,7 +365,7 @@
 
         } catch (err) {
             clearInterval(interval);
-            if (err.message !== 'Request Aborted') {
+            if (err.message !== 'Aborted') {
                 alert("فشل في المحرك: " + err.message);
                 loader.style.display = 'none';
             }
@@ -430,29 +386,17 @@
     async function dl(id) {
         const imageUrl = storedUrls[id].url;
         const fileName = `MERART_STUDIO_${Date.now()}.png`;
-
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = fileName;
-            a.target = '_blank'; 
-            
-            document.body.appendChild(a);
-            a.click();
-            
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            a.href = url; a.download = fileName; a.target = '_blank';
+            document.body.appendChild(a); a.click();
+            window.URL.revokeObjectURL(url); document.body.removeChild(a);
         } catch (err) {
-            console.warn("CORS fetch failed, falling back to direct link.");
             const a = document.createElement('a');
-            a.href = imageUrl;
-            a.download = fileName;
-            a.target = '_blank';
+            a.href = imageUrl; a.download = fileName; a.target = '_blank';
             a.click();
         }
     }
