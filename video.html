@@ -255,6 +255,7 @@
     function updateModels() {
         const host = document.getElementById('host-select').value;
         const modelSelect = document.getElementById('m1');
+        if(!modelSelect) return;
         modelSelect.innerHTML = '';
         hostData[host].forEach(m => {
             let opt = document.createElement('option');
@@ -276,7 +277,6 @@
     async function fire(type) {
         let id = (type==='text')?1:(type==='i2i')?2:3;
         
-        // إلغاء الطلب السابق
         if (activeControllers[id]) { activeControllers[id].abort(); }
         activeControllers[id] = new AbortController();
 
@@ -285,11 +285,11 @@
         const percTxt = document.getElementById(`perc${id}`);
         const img = document.getElementById(`img${id}`);
         const actions = document.getElementById(`act${id}`);
-        const statusTxt = document.getElementById(`status${id}`);
         
-        // تصفير وتنظيف الواجهة فوراً
+        // إجراء تنظيف عميق (Deep Clean)
+        if (img.src.startsWith('blob:')) { URL.revokeObjectURL(img.src); }
         img.style.display = 'none'; 
-        img.removeAttribute('src'); // حذف السورس لقطع الذاكرة
+        img.src = ""; 
         actions.style.display = 'none';
         loader.style.display = 'block';
         progressBar.style.width = '0%';
@@ -308,26 +308,23 @@
         if(refUrl !== "") smartPrompt = `${refUrl} , face match , ${smartPrompt}`;
 
         const bypassCode = ", (unfiltered:1.6), no censorship, explicit textures";
+        const forceNewSeed = Math.floor(Math.random() * 999999999);
+        const cacheBuster = Date.now();
 
         let progress = 0;
         let interval = setInterval(() => {
-            if (progress < 96) {
-                progress += Math.floor(Math.random() * 5) + 1;
+            if (progress < 95) {
+                progress += Math.floor(Math.random() * 5) + 2;
                 progressBar.style.width = progress + '%';
                 percTxt.innerText = progress + '%';
             }
-        }, 300);
+        }, 250);
 
         try {
-            // التعديل الجوهري: Seed عشوائي جداً مع Timestamp لضمان صورة جديدة
-            const forceNewSeed = Math.floor(Math.random() * 1000000000);
-            const cacheBuster = Date.now();
             let finalUrl = "";
-
             if (host === 'pollinations_raw' || host === 'nol_ultra') {
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + bypassCode)}?width=${w}&height=${h}&seed=${forceNewSeed}&model=${model}&nologo=true&safe=false&t=${cacheBuster}`;
-            } 
-            else if (host === 'ghost') {
+            } else if (host === 'ghost') {
                 const response = await fetch(CLOUDFLARE_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -336,37 +333,31 @@
                 });
                 const imageBlob = await response.blob();
                 finalUrl = URL.createObjectURL(imageBlob);
-            }
-            else {
+            } else {
                 finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt + qualityBoost)}?width=${w}&height=${h}&seed=${forceNewSeed}&model=${model}&nologo=true&t=${cacheBuster}`;
             }
 
-            // تحميل الصورة في الذاكرة أولاً قبل عرضها
-            const imgLoader = new Image();
-            imgLoader.crossOrigin = "anonymous";
-            
-            const loadPromise = new Promise((resolve, reject) => {
-                imgLoader.onload = resolve;
-                imgLoader.onerror = reject;
-                activeControllers[id].signal.addEventListener('abort', () => reject(new Error('Aborted')));
-            });
-
-            imgLoader.src = finalUrl;
-            await loadPromise;
+            // إجبار المتصفح على جلب الصورة كـ Blob جديد تماماً لكسر الـ Cache
+            const res = await fetch(finalUrl, { cache: 'no-store', signal: activeControllers[id].signal });
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
 
             clearInterval(interval);
             progressBar.style.width = '100%';
             percTxt.innerText = '100%';
-            loader.style.display = 'none';
-            img.src = finalUrl;
-            img.style.display = 'block';
-            actions.style.display = 'flex';
-            storedUrls[id] = { url: finalUrl, prompt: smartPrompt, model: host + ":" + model };
+            
+            setTimeout(() => {
+                loader.style.display = 'none';
+                img.src = blobUrl;
+                img.style.display = 'block';
+                actions.style.display = 'flex';
+                storedUrls[id] = { url: blobUrl, prompt: smartPrompt, model: host + ":" + model };
+            }, 300);
 
         } catch (err) {
             clearInterval(interval);
-            if (err.message !== 'Aborted') {
-                alert("فشل في المحرك: " + err.message);
+            if (err.name !== 'AbortError') {
+                console.error(err);
                 loader.style.display = 'none';
             }
         }
@@ -374,6 +365,7 @@
 
     async function save(id) {
         const data = storedUrls[id];
+        if(!data) return;
         try {
             const { error } = await _supabase.from('merart_logs').insert([{ 
                 prompt: data.prompt, output_url: data.url, content_type: 'Image', model_used: data.model
@@ -386,19 +378,10 @@
     async function dl(id) {
         const imageUrl = storedUrls[id].url;
         const fileName = `MERART_STUDIO_${Date.now()}.png`;
-        try {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = fileName; a.target = '_blank';
-            document.body.appendChild(a); a.click();
-            window.URL.revokeObjectURL(url); document.body.removeChild(a);
-        } catch (err) {
-            const a = document.createElement('a');
-            a.href = imageUrl; a.download = fileName; a.target = '_blank';
-            a.click();
-        }
+        const a = document.createElement('a');
+        a.href = imageUrl; a.download = fileName;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
     }
 </script>
 </body>
